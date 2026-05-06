@@ -1,0 +1,7 @@
+# GTK lives only on Linux hosts; macOS Clang can't resolve linux/runner sources.
+# Keeps clangd quiet here while real builds still use CMake/pkg-config on Linux.
+---
+If:
+  PathMatch: ^linux/.*\.(cc|h)$
+Diagnostics:
+  Suppress: "*"

@@ -1,4 +1,4 @@
-package com.example.digital_scorebook_pro
+package com.kestrelcode.keep
 
 import io.flutter.embedding.android.FlutterActivity
 

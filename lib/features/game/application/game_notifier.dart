@@ -49,6 +49,15 @@ class GameNotifier extends Notifier<GameState> {
     _cloudGameId = gameId;
   }
 
+  /// Awaitable CloudKit push for the current scoreboard state (e.g. before suspend).
+  Future<void> flushCloudSync() async {
+    final cloudSyncService = ref.read(cloudSyncServiceProvider);
+    await cloudSyncService.pushStateToCloud(
+      gameId: _cloudGameId,
+      payloadJson: state.toJson(),
+    );
+  }
+
   void undo() {
     if (_history.isEmpty) {
       return;
@@ -64,12 +73,20 @@ class GameNotifier extends Notifier<GameState> {
     _broadcast();
   }
 
-  void incrementBalls() {
-    _commit(state.copyWith(balls: (state.balls + 1).clamp(0, 4)));
+  /// Increments the ball count; on the fourth ball, awards first base via walk.
+  void incrementBalls({bool fromPitchButton = false}) {
+    if (state.balls >= 3) {
+      _walkBatter();
+      _appendLog(
+        fromPitchButton ? 'Pitch: Ball — ball four, walk' : 'Ball four — walk',
+      );
+      return;
+    }
+    _commit(state.copyWith(balls: state.balls + 1));
   }
 
   void decrementBalls() {
-    _commit(state.copyWith(balls: (state.balls - 1).clamp(0, 4)));
+    _commit(state.copyWith(balls: (state.balls - 1).clamp(0, 3)));
   }
 
   void incrementStrikes() {
@@ -134,7 +151,15 @@ class GameNotifier extends Notifier<GameState> {
 
   void logPitch(String type) {
     if (type == 'Ball') {
-      incrementBalls();
+      final willWalk = state.balls >= 3;
+      incrementBalls(fromPitchButton: true);
+      if (!willWalk) {
+        incrementDefensivePitchCount();
+        _appendLog('Pitch: Ball');
+        return;
+      }
+      incrementDefensivePitchCount();
+      return;
     } else if (type == 'Strike') {
       incrementStrikes();
     } else if (type == 'Foul') {
@@ -184,8 +209,16 @@ class GameNotifier extends Notifier<GameState> {
 
   void logOutcome(String outcome) {
     if (outcome == 'BB' || outcome == 'Walk') {
+      final walked = activeBatter;
       _walkBatter();
-      _appendLog('Walk issued to ${activeBatter.name}');
+      _appendLog('Walk issued to ${walked.name}');
+      return;
+    }
+
+    if (outcome == 'HBP') {
+      final batter = activeBatter;
+      _walkBatter();
+      _appendLog('Hit by pitch — ${batter.name} takes first base');
       return;
     }
 

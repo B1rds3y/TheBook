@@ -7,6 +7,34 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+#ifdef __linux__
+#include <limits.h>
+#include <unistd.h>
+#endif
+
+namespace {
+
+#ifdef __linux__
+void try_set_window_icon_from_bundle(GtkWindow* window) {
+  char exe_path[PATH_MAX];
+  ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+  if (len <= 0) {
+    return;
+  }
+  exe_path[len] = '\0';
+  g_autofree gchar* dir = g_path_get_dirname(exe_path);
+  g_autofree gchar* icon_path = g_build_filename(
+      dir, "data", "icons", "hicolor", "128x128", "apps",
+      APPLICATION_ID ".png", nullptr);
+  if (!g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
+    return;
+  }
+  gtk_window_set_icon_from_file(window, icon_path, nullptr);
+}
+#endif
+
+}  // namespace
+
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
@@ -45,14 +73,18 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "digital_scorebook_pro");
+    gtk_header_bar_set_title(header_bar, "Kestrel Keep");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "digital_scorebook_pro");
+    gtk_window_set_title(window, "Kestrel Keep");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+
+#ifdef __linux__
+  try_set_window_icon_from_bundle(window);
+#endif
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(

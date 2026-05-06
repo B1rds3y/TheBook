@@ -1,16 +1,21 @@
+import 'package:digital_scorebook_pro/app/app_theme.dart';
 import 'package:digital_scorebook_pro/app/theme_mode_notifier.dart';
+import 'package:digital_scorebook_pro/app/ui/popup_route_depth.dart';
 import 'package:digital_scorebook_pro/features/game/presentation/game_screen.dart';
 import 'package:digital_scorebook_pro/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+final PopupRouteDepthObserver _popupRouteDepthObserver =
+    PopupRouteDepthObserver();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: DigitalScorebookApp()));
+  runApp(const ProviderScope(child: KestrelKeepApp()));
 }
 
-class DigitalScorebookApp extends ConsumerWidget {
-  const DigitalScorebookApp({super.key});
+class KestrelKeepApp extends ConsumerWidget {
+  const KestrelKeepApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,20 +23,11 @@ class DigitalScorebookApp extends ConsumerWidget {
     ref.watch(videoStreamServiceProvider);
 
     return MaterialApp(
-      title: 'Digital Scorebook Pro',
+      title: 'Kestrel Keep',
       themeMode: themeMode,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          brightness: Brightness.dark,
-        ),
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      navigatorObservers: [_popupRouteDepthObserver],
       home: const GameScreen(),
     );
   }

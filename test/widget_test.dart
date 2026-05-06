@@ -11,8 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:digital_scorebook_pro/main.dart';
 
 void main() {
-  testWidgets('renders scorebook shell', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: DigitalScorebookApp()));
+  testWidgets('renders Kestrel Keep shell', (WidgetTester tester) async {
+    await tester.pumpWidget(const ProviderScope(child: KestrelKeepApp()));
 
     expect(find.text('Undo'), findsOneWidget);
   });
