@@ -487,8 +487,8 @@ class _LineScoreHeader extends StatelessWidget {
                     3,
                     (index) => Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 12,
-                      height: 12,
+                      width: SbLayout.countIndicatorDiameter,
+                      height: SbLayout.countIndicatorDiameter,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: SbColors.outsRingBorder),
@@ -862,7 +862,7 @@ class _CountPitchStrip extends StatelessWidget {
   final VoidCallback onStrikeMinus;
   final VoidCallback onStrikePlus;
 
-  static const double _dotRowHeight = 12;
+  static const double _dotRowHeight = SbLayout.countIndicatorDiameter;
   static const double _dotNumberGap = 6;
   static const double _numberFontSize = 40;
 
@@ -880,11 +880,8 @@ class _CountPitchStrip extends StatelessWidget {
       ),
       child: Container(
         padding: const EdgeInsets.all(SbSpacing.stripInner),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: SbColors.pitchStripBg,
-          border: const Border(
-            bottom: BorderSide(color: SbColors.divider),
-          ),
         ),
         child: Row(
           children: [
@@ -978,9 +975,7 @@ class _CountPitchStrip extends StatelessWidget {
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
         final compact = maxW < SbPitchCircle.slotCompactBreakpoint;
-        final btnSize = compact
-            ? SbPitchCircle.diameterCompact
-            : SbPitchCircle.diameter;
+        final btnSize = SbPitchCircle.stripControlDiameter;
         final fontSize = compact ? 28.0 : _numberFontSize;
         final dotGap = compact ? 5.0 : 8.0;
 
@@ -1054,8 +1049,8 @@ class _CountPitchStrip extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.only(left: i > 0 ? dotSpacing : 0),
             child: Container(
-              width: 10,
-              height: 10,
+              width: SbLayout.countIndicatorDiameter,
+              height: SbLayout.countIndicatorDiameter,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: on ? activeColor : Colors.transparent,
@@ -1074,7 +1069,7 @@ class _CountPitchStrip extends StatelessWidget {
   Widget _circleButton({
     required IconData icon,
     required VoidCallback onTap,
-    double diameter = SbPitchCircle.diameter,
+    double diameter = SbPitchCircle.stripControlDiameter,
   }) {
     final iconSize = SbPitchCircle.iconSizeForCircleDiameter(diameter);
     return Material(
@@ -1124,7 +1119,7 @@ class _AtBatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final compact =
         MediaQuery.sizeOf(context).width < SbBreakpoints.atBatCompactWidth;
-    final chevronDiameter = SbPitchCircle.controlDiameterForScreenWidth(
+    final chevronDiameter = SbPitchCircle.atBatChevronDiameterForScreenWidth(
       MediaQuery.sizeOf(context).width,
     );
     return Container(

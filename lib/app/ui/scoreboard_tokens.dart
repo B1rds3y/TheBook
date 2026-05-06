@@ -209,7 +209,10 @@ abstract final class SbLayout {
   static const double actionChipFillOpacity = 0.2;
 
   /// Square size for 1st–3rd base tiles and height for single-line action chips.
-  static const double scoreboardTileExtent = 50;
+  static const double scoreboardTileExtent = 48;
+
+  /// Linescore outs dots + pitch-strip balls/strikes indicator dots (logical px).
+  static const double countIndicatorDiameter = 14;
 
   /// Frosted left/right/bottom edge wrap thickness on the game screen.
   static const double chromeEdgeWrapThickness = 8;
@@ -243,28 +246,34 @@ abstract final class SbBreakpoints {
   static const double topBarCompactWidth = 420;
 }
 
-/// Matches `_CountPitchStrip` +/- circle sizing (`LayoutBuilder` slot width).
+/// Pitch-strip +/- controls vs at-bat chevrons (different tap targets).
 abstract final class SbPitchCircle {
   SbPitchCircle._();
 
-  static const double diameter = 40;
-  static const double diameterCompact = 30;
+  /// Minus/plus circles beside balls & strikes on `_CountPitchStrip`.
+  static const double stripControlDiameter = 14;
+
+  /// Prev/next batter chevrons on `_AtBatRow` (unchanged responsive sizing).
+  static const double atBatChevronDiameter = 40;
+  static const double atBatChevronDiameterCompact = 30;
+
+  /// `_miniCounter` typography/layout still keys off slot width vs this.
   static const double slotCompactBreakpoint = 136;
 
-  static double slotWidthForScreenWidth(double screenWidth) {
-    const outer = SbSpacing.stripOuterH * 2;
-    const inner = SbSpacing.stripInner * 2;
-    final innerRowWidth = screenWidth - outer - inner;
-    return (innerRowWidth - SbLayout.defPitchesBlockWidth) / 2;
-  }
-
-  static double controlDiameterForScreenWidth(double screenWidth) {
-    final slot = slotWidthForScreenWidth(screenWidth);
-    return slot < slotCompactBreakpoint ? diameterCompact : diameter;
+  static double atBatChevronDiameterForScreenWidth(double screenWidth) {
+    return screenWidth < SbBreakpoints.atBatCompactWidth
+        ? atBatChevronDiameterCompact
+        : atBatChevronDiameter;
   }
 
   /// Icon size inside circular +/- / chevron controls.
   static double iconSizeForCircleDiameter(double diameter) {
-    return diameter < SbPitchCircle.diameter ? 17.0 : 20.0;
+    if (diameter <= 18) {
+      return 10;
+    }
+    if (diameter <= 34) {
+      return 17;
+    }
+    return 20;
   }
 }
