@@ -1,4 +1,6 @@
 {
+  // Microsoft C/C++ extension only: GTK headers exist only on Linux. On macOS this avoids bogus errors.
+  // If you develop the Flutter Linux runner on Linux, remove `C_Cpp.files.exclude` below (or override in User settings).
   "C_Cpp.files.exclude": {
     "**/linux/**": true
   }
