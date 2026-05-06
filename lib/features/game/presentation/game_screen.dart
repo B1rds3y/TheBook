@@ -84,6 +84,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                       _AtBatRow(
                         isTop: gameState.isTop,
                         batterName: activeBatter.name,
+                        statLineText: 'Stats coming soon',
                         onDeckName: onDeckBatter.name,
                         onPrevious: () => _withHaptic(notifier.previousBatter),
                         onNext: () => _withHaptic(notifier.nextBatter),
@@ -279,7 +280,7 @@ class _LineScoreHeader extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xFF8A8F9C),
+            color: Color(0xFFC2C7D4),
             letterSpacing: 1.2,
             fontWeight: FontWeight.w600,
           ),
@@ -310,30 +311,31 @@ class _DiamondWidget extends StatelessWidget {
     return SizedBox(
       height: 250,
       child: Center(
-        child: Transform.rotate(
-          angle: 0.785398, // 45 degrees
-          child: SizedBox(
-            width: 190,
-            height: 190,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF21222C),
-                      border: Border.all(
-                        color: const Color(0xFF3A3C49),
-                        width: 2,
-                      ),
+        child: SizedBox(
+          width: 250,
+          height: 230,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.rotate(
+                angle: 0.785398,
+                child: Container(
+                  width: 170,
+                  height: 170,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF21222C),
+                    border: Border.all(
+                      color: const Color(0xFF3A3C49),
+                      width: 2,
                     ),
                   ),
                 ),
-                _baseTile(0, const Alignment(0.0, 1.0)),
-                _baseTile(1, const Alignment(1.0, 0.0)),
-                _baseTile(2, const Alignment(0.0, -1.0)),
-                _homePlate(),
-              ],
-            ),
+              ),
+              _baseTile(2, const Alignment(-0.58, 0.02)),
+              _baseTile(1, const Alignment(0.0, -0.56)),
+              _baseTile(0, const Alignment(0.58, 0.02)),
+              _homePlate(),
+            ],
           ),
         ),
       ),
@@ -348,29 +350,24 @@ class _DiamondWidget extends StatelessWidget {
       alignment: alignment,
       child: GestureDetector(
         onTap: () => onBaseTapped(index),
-        child: Transform.rotate(
-          angle: -0.785398,
-          child: Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
+        child: Container(
+          width: 84,
+          height: 84,
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xFF2D66D9) : const Color(0xFF2A2C37),
+            border: Border.all(
               color: selected
-                  ? const Color(0xFF2D66D9)
-                  : const Color(0xFF2A2C37),
-              border: Border.all(
-                color: selected
-                    ? const Color(0xFF4A82F5)
-                    : const Color(0xFF4A4F5C),
-                width: 1.5,
-              ),
-              borderRadius: BorderRadius.circular(8),
+                  ? const Color(0xFF4A82F5)
+                  : const Color(0xFF4A4F5C),
+              width: 1.5,
             ),
-            alignment: Alignment.center,
-            child: Text(
-              player?.name ?? 'Base ${index + 1}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12),
-            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            player?.name ?? 'Base ${index + 1}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20, color: Color(0xFFE6EAF2)),
           ),
         ),
       ),
@@ -379,24 +376,21 @@ class _DiamondWidget extends StatelessWidget {
 
   Widget _homePlate() {
     return Align(
-      alignment: const Alignment(0, 1.2),
-      child: Transform.rotate(
-        angle: -0.785398,
-        child: Container(
-          width: 64,
-          height: 52,
-          decoration: BoxDecoration(
-            color: const Color(0xFF2A2C37),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF4A4F5C)),
-          ),
-          alignment: Alignment.center,
-          child: const Text(
-            'Home',
-            style: TextStyle(
-              color: Color(0xFF8A8F9C),
-              fontWeight: FontWeight.w600,
-            ),
+      alignment: const Alignment(0, 0.76),
+      child: Container(
+        width: 72,
+        height: 56,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2C37),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFF4A4F5C)),
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Home',
+          style: TextStyle(
+            color: Color(0xFFE6EAF2),
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -420,14 +414,21 @@ class _RunnerActionPanel extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Wrap(
+          runSpacing: 8,
+          spacing: 8,
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text('Runner Action: Base ${baseIndex + 1}'),
-            Wrap(
-              spacing: 8,
+            Text(
+              'Runner Action: Base ${baseIndex + 1}',
+              style: const TextStyle(color: Color(0xFFE5E9F2)),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 FilledButton(onPressed: onScore, child: const Text('Score')),
+                const SizedBox(width: 8),
                 OutlinedButton(onPressed: onClear, child: const Text('Clear')),
               ],
             ),
@@ -474,7 +475,7 @@ class _CountPitchStrip extends StatelessWidget {
             Expanded(
               child: _miniCounter(
                 value: state.balls,
-                color: const Color(0xFF00D58A),
+                color: const Color(0xFF00E09E),
                 onMinus: onBallMinus,
                 onPlus: onBallPlus,
               ),
@@ -494,7 +495,7 @@ class _CountPitchStrip extends StatelessWidget {
                     'DEF PITCHES',
                     style: TextStyle(
                       fontSize: 10,
-                      color: Color(0xFF9CA2AE),
+                      color: Color(0xFFC9CFDB),
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -503,7 +504,7 @@ class _CountPitchStrip extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF70A4FF),
+                      color: Color(0xFF7FB0FF),
                     ),
                   ),
                 ],
@@ -512,7 +513,7 @@ class _CountPitchStrip extends StatelessWidget {
             Expanded(
               child: _miniCounter(
                 value: state.strikes,
-                color: const Color(0xFFFF6675),
+                color: const Color(0xFFFF7483),
                 onMinus: onStrikeMinus,
                 onPlus: onStrikePlus,
               ),
@@ -536,7 +537,7 @@ class _CountPitchStrip extends StatelessWidget {
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('•••', style: TextStyle(color: Color(0xFF2E3342))),
+            const Text('•••', style: TextStyle(color: Color(0xFF818798))),
             Text(
               '$value',
               style: TextStyle(
@@ -563,7 +564,7 @@ class _CountPitchStrip extends StatelessWidget {
           color: Color(0xFF1D212E),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 20),
+        child: Icon(icon, size: 20, color: const Color(0xFFE4E8F0)),
       ),
     );
   }
@@ -573,6 +574,7 @@ class _AtBatRow extends StatelessWidget {
   const _AtBatRow({
     required this.isTop,
     required this.batterName,
+    required this.statLineText,
     required this.onDeckName,
     required this.onPrevious,
     required this.onNext,
@@ -580,12 +582,14 @@ class _AtBatRow extends StatelessWidget {
 
   final bool isTop;
   final String batterName;
+  final String statLineText;
   final String onDeckName;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 390;
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -604,7 +608,7 @@ class _AtBatRow extends StatelessWidget {
                   TextSpan(
                     text: 'AT BAT ',
                     style: const TextStyle(
-                      color: Color(0xFF8A8F9C),
+                      color: Color(0xFFC8CDD8),
                       fontSize: 12,
                     ),
                     children: [
@@ -620,16 +624,18 @@ class _AtBatRow extends StatelessWidget {
                 ),
                 Text(
                   batterName,
-                  style: const TextStyle(
-                    fontSize: 38,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: compact ? 30 : 38,
                     fontWeight: FontWeight.w700,
                     height: 1,
+                    color: const Color(0xFFF1F4FA),
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  '0-FOR-0 (.000)',
-                  style: TextStyle(
+                Text(
+                  statLineText,
+                  style: const TextStyle(
                     color: Color(0xFFD59F3C),
                     fontWeight: FontWeight.w600,
                   ),
@@ -638,25 +644,29 @@ class _AtBatRow extends StatelessWidget {
             ),
           ),
           _circleArrow(onNext, LucideIcons.chevronRight),
-          const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const Text(
-                'ON DECK',
-                style: TextStyle(
-                  color: Color(0xFF8A8F9C),
-                  fontWeight: FontWeight.w600,
+          SizedBox(width: compact ? 8 : 14),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const Text(
+                  'ON DECK',
+                  style: TextStyle(
+                    color: Color(0xFFC8CDD8),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              Text(
-                onDeckName,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
+                Text(
+                  onDeckName,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: compact ? 22 : 28,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFF1F4FA),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -674,7 +684,7 @@ class _AtBatRow extends StatelessWidget {
           color: Color(0xFF202534),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon),
+        child: Icon(icon, color: const Color(0xFFE9EDF5)),
       ),
     );
   }
@@ -720,7 +730,11 @@ class _ActionRow extends StatelessWidget {
           child: Text(
             action.label,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFFF1F4FA),
+            ),
           ),
         ),
       ),
@@ -879,7 +893,7 @@ class _PlayByPlayPanel extends StatelessWidget {
               Text(
                 'PLAY-BY-PLAY',
                 style: TextStyle(
-                  color: Color(0xFF8A8F9C),
+                  color: Color(0xFFC8CDD8),
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w700,
                 ),
@@ -888,7 +902,7 @@ class _PlayByPlayPanel extends StatelessWidget {
               Text(
                 'AUTO-SAVED',
                 style: TextStyle(
-                  color: Color(0xFF8A8F9C),
+                  color: Color(0xFFC8CDD8),
                   fontWeight: FontWeight.w600,
                 ),
               ),
