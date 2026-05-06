@@ -737,9 +737,7 @@ class _DiamondWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: _baseLabelSmallFontSize,
                         fontWeight: FontWeight.w600,
-                        color: selected
-                            ? SbColors.baseSublabelSelected
-                            : SbColors.baseSublabelIdle,
+                        color: SbColors.textPrimary,
                       ),
                     ),
                   ],
@@ -750,9 +748,7 @@ class _DiamondWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: _baseLabelLargeFontSize,
                     fontWeight: FontWeight.w600,
-                    color: selected
-                        ? SbColors.baseLabelSelected
-                        : SbColors.baseLabelIdle,
+                    color: SbColors.textPrimary,
                   ),
                 ),
         ),
@@ -775,7 +771,7 @@ class _DiamondWidget extends StatelessWidget {
         child: const Text(
           'Home',
           style: TextStyle(
-            color: SbColors.homePlateText,
+            color: SbColors.baseLabelIdle,
             fontWeight: FontWeight.w700,
           ),
         ),
