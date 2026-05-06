@@ -1,0 +1,89 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter: Android Debug",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "deviceId": "android"
+    },
+    {
+      "name": "Flutter: Android Profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "deviceId": "android"
+    },
+    {
+      "name": "Flutter: Android Release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "deviceId": "android"
+    },
+    {
+      "name": "Flutter: iOS Debug",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "deviceId": "ios"
+    },
+    {
+      "name": "Flutter: iOS Profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "deviceId": "ios"
+    },
+    {
+      "name": "Flutter: iOS Release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "deviceId": "ios"
+    },
+    {
+      "name": "Flutter: iOS Simulator (iPhone 17) Debug",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "deviceId": "iPhone 17"
+    },
+    {
+      "name": "Flutter: iOS Simulator (iPhone 17) Profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "deviceId": "iPhone 17"
+    },
+    {
+      "name": "Flutter: iOS Simulator (iPhone 17) Release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "deviceId": "iPhone 17"
+    },
+    {
+      "name": "Flutter: iOS Simulator (iPad 13-inch) Debug",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "deviceId": "iPad 13-inch"
+    },
+    {
+      "name": "Flutter: iOS Simulator (iPad 13-inch) Profile",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "deviceId": "iPad 13-inch"
+    },
+    {
+      "name": "Flutter: iOS Simulator (iPad 13-inch) Release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "deviceId": "iPad 13-inch"
+    }
+  ]
+}
