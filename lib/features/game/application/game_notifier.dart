@@ -7,14 +7,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GameNotifier extends Notifier<GameState> {
   final List<GameState> _history = <GameState>[];
-  final List<Player> _awayLineup = List<Player>.generate(
-    9,
-    (index) => Player(name: 'Away ${index + 1}'),
-  );
-  final List<Player> _homeLineup = List<Player>.generate(
-    9,
-    (index) => Player(name: 'Home ${index + 1}'),
-  );
+  final List<Player> _awayLineup = const <Player>[
+    Player(name: 'Wes'),
+    Player(name: 'Jaxon'),
+    Player(name: 'Carter'),
+    Player(name: 'Mason'),
+    Player(name: 'Noah'),
+    Player(name: 'Brody'),
+    Player(name: 'Caleb'),
+    Player(name: 'Levi'),
+    Player(name: 'Liam'),
+  ];
+  final List<Player> _homeLineup = const <Player>[
+    Player(name: 'Davis'),
+    Player(name: 'Hudson'),
+    Player(name: 'Micah'),
+    Player(name: 'Briggs'),
+    Player(name: 'Eli'),
+    Player(name: 'Cooper'),
+    Player(name: 'Tate'),
+    Player(name: 'Wyatt'),
+    Player(name: 'Hayes'),
+  ];
 
   String _cloudGameId = 'local-active-game';
 
@@ -24,6 +38,10 @@ class GameNotifier extends Notifier<GameState> {
   Player get activeBatter => state.isTop
       ? _awayLineup[state.awayBatterIndex % _awayLineup.length]
       : _homeLineup[state.homeBatterIndex % _homeLineup.length];
+
+  Player get onDeckBatter => state.isTop
+      ? _awayLineup[(state.awayBatterIndex + 1) % _awayLineup.length]
+      : _homeLineup[(state.homeBatterIndex + 1) % _homeLineup.length];
 
   List<Player> get activeLineup => state.isTop ? _awayLineup : _homeLineup;
 
@@ -72,7 +90,9 @@ class GameNotifier extends Notifier<GameState> {
 
   void decrementDefensivePitchCount() {
     if (state.isTop) {
-      _commit(state.copyWith(homePitches: (state.homePitches - 1).clamp(0, 999)));
+      _commit(
+        state.copyWith(homePitches: (state.homePitches - 1).clamp(0, 999)),
+      );
       return;
     }
     _commit(state.copyWith(awayPitches: (state.awayPitches - 1).clamp(0, 999)));
@@ -81,11 +101,19 @@ class GameNotifier extends Notifier<GameState> {
   void previousBatter() {
     if (state.isTop) {
       final index = (state.awayBatterIndex - 1) % _awayLineup.length;
-      _commit(state.copyWith(awayBatterIndex: index < 0 ? _awayLineup.length - 1 : index));
+      _commit(
+        state.copyWith(
+          awayBatterIndex: index < 0 ? _awayLineup.length - 1 : index,
+        ),
+      );
       return;
     }
     final index = (state.homeBatterIndex - 1) % _homeLineup.length;
-    _commit(state.copyWith(homeBatterIndex: index < 0 ? _homeLineup.length - 1 : index));
+    _commit(
+      state.copyWith(
+        homeBatterIndex: index < 0 ? _homeLineup.length - 1 : index,
+      ),
+    );
   }
 
   void nextBatter() {
@@ -145,11 +173,10 @@ class GameNotifier extends Notifier<GameState> {
       nextBases[basesTaken - 1] = batter;
     }
 
-    var nextState = _applyRuns(state, runs).copyWith(
-      bases: nextBases,
-      balls: 0,
-      strikes: 0,
-    );
+    var nextState = _applyRuns(
+      state,
+      runs,
+    ).copyWith(bases: nextBases, balls: 0, strikes: 0);
     nextState = _advanceBatterIndex(nextState);
     _commit(nextState);
     _appendLog('Hit: ${basesTaken}B by ${batter.name}');
@@ -187,10 +214,7 @@ class GameNotifier extends Notifier<GameState> {
       return;
     }
     nextBases[baseIndex] = null;
-    final nextState = _applyRuns(
-      state.copyWith(bases: nextBases),
-      1,
-    );
+    final nextState = _applyRuns(state.copyWith(bases: nextBases), 1);
     _commit(nextState);
     _appendLog('Runner scored from base ${baseIndex + 1}');
   }
@@ -212,11 +236,10 @@ class GameNotifier extends Notifier<GameState> {
     }
     nextBases[0] = batter;
 
-    var nextState = _applyRuns(state, runs).copyWith(
-      bases: nextBases,
-      balls: 0,
-      strikes: 0,
-    );
+    var nextState = _applyRuns(
+      state,
+      runs,
+    ).copyWith(bases: nextBases, balls: 0, strikes: 0);
     nextState = _advanceBatterIndex(nextState);
     _commit(nextState);
   }

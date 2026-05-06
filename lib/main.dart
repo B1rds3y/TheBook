@@ -1,23 +1,11 @@
-import 'dart:developer';
-
 import 'package:digital_scorebook_pro/app/theme_mode_notifier.dart';
 import 'package:digital_scorebook_pro/features/game/presentation/game_screen.dart';
 import 'package:digital_scorebook_pro/services/providers.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp();
-  } catch (error, stackTrace) {
-    log(
-      'Firebase init skipped: $error',
-      name: 'main',
-      stackTrace: stackTrace,
-    );
-  }
   runApp(const ProviderScope(child: DigitalScorebookApp()));
 }
 

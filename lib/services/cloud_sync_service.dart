@@ -1,22 +1,43 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_kit/cloud_kit.dart';
 
 class CloudSyncService {
-  CloudSyncService({FirebaseDatabase? database})
-      : _database = database ?? FirebaseDatabase.instance;
+  CloudSyncService({
+    CloudKit? cloudKit,
+    String containerId = _defaultContainerId,
+  }) : _cloudKit = cloudKit ?? CloudKit(containerId);
 
-  final FirebaseDatabase _database;
+  static const String _defaultContainerId = 'iCloud.com.example.digitalScorebookPro';
+  static const String _recordPrefix = 'game_state_';
+
+  final CloudKit _cloudKit;
 
   Future<void> pushStateToCloud({
     required String gameId,
     required Map<String, dynamic> payloadJson,
   }) async {
+    if (!Platform.isIOS) {
+      return;
+    }
+
     try {
-      await _database.ref('live_games/$gameId').set(payloadJson);
+      final status = await _cloudKit.getAccountStatus();
+      if (status != CloudKitAccountStatus.available) {
+        log(
+          'CloudKit unavailable for sync: $status',
+          name: 'CloudSyncService',
+        );
+        return;
+      }
+
+      final key = '$_recordPrefix$gameId';
+      await _cloudKit.save(key, jsonEncode(payloadJson));
     } catch (error, stackTrace) {
       log(
-        'Cloud sync skipped: $error',
+        'CloudKit sync skipped: $error',
         name: 'CloudSyncService',
         stackTrace: stackTrace,
       );

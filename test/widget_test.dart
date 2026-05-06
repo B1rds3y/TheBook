@@ -12,12 +12,8 @@ import 'package:digital_scorebook_pro/main.dart';
 
 void main() {
   testWidgets('renders scorebook shell', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: DigitalScorebookApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: DigitalScorebookApp()));
 
-    expect(find.text('Digital Scorebook Pro'), findsOneWidget);
+    expect(find.text('Undo'), findsOneWidget);
   });
 }
