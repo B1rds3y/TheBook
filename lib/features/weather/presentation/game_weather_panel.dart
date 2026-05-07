@@ -56,7 +56,10 @@ class _GameWeatherPanelState extends ConsumerState<GameWeatherPanel> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: weather.loading
-                      ? const SizedBox(width: 32, height: 32)
+                      ? const SizedBox(
+                          width: UiComponentTokens.topBarPillHeight - UiCoreSpacing.md,
+                          height: UiComponentTokens.topBarPillHeight - UiCoreSpacing.md,
+                        )
                       : IconButton(
                           tooltip: 'Refresh weather',
                           visualDensity: VisualDensity.compact,
@@ -117,14 +120,14 @@ class _WeatherLoadingBody extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 18,
-          height: 18,
+          width: UiCoreTypography.titleLg,
+          height: UiCoreTypography.titleLg,
           child: CircularProgressIndicator(
             strokeWidth: UiCoreStroke.thick,
             color: SbColors.inningAccent.withValues(alpha: 0.85),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: UiCoreSpacing.lg),
         Expanded(
           child: Text(
             'Getting precise location and forecast…',
@@ -226,19 +229,19 @@ class _WeatherLoadedBody extends StatelessWidget {
   }
 
   static Widget _divider() => Divider(
-        height: 1,
-        thickness: 1,
+        height: UiCoreStroke.thin,
+        thickness: UiCoreStroke.thin,
         color: SbColors.pbpPanelBorder.withValues(alpha: 0.65),
       );
 
   static Widget _kv(String label, String value, TextStyle valueStyle) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.only(bottom: UiCoreSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 132,
+            width: UiComponentTokens.weatherKeyValueLabelWidth,
             child: Text(
               label,
               style: TextStyle(
@@ -260,7 +263,7 @@ class _WeatherLoadedBody extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 15, color: SbColors.inningAccent.withValues(alpha: 0.88)),
-        const SizedBox(width: 7),
+        const SizedBox(width: UiCoreSpacing.smMinus),
         Text(
           title,
           style: muted.copyWith(letterSpacing: 0.8),
@@ -323,7 +326,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: UiCoreSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,7 +368,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                     '$dayNight · observation $obs',
                     style: mutedRow,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: UiCoreSpacing.md),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -398,7 +401,7 @@ class _WeatherLoadedBody extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: expanded
               ? Padding(
-                  padding: const EdgeInsets.only(top: 14),
+                  padding: const EdgeInsets.only(top: UiCoreSpacing.xl),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -406,7 +409,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                         'Impact gauges',
                         style: mutedRow.copyWith(letterSpacing: 0.8),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: UiCoreSpacing.sm),
                       _MetricGauge(
                         icon: LucideIcons.droplets,
                         label: 'Humidity',
@@ -415,7 +418,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                             '${snapshot.relativeHumidityPercent}%',
                         accent: SbColors.walkLabel,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: UiCoreSpacing.sm),
                       _MetricGauge(
                         icon: LucideIcons.cloud,
                         label: 'Cloud cover',
@@ -424,7 +427,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                         accent: SbColors.inningAccent,
                       ),
                       if (snapshot.uvIndex != null) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: UiCoreSpacing.sm),
                         _MetricGauge(
                           icon: LucideIcons.sunMedium,
                           label: 'UV index',
@@ -433,7 +436,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                           accent: SbColors.statLineGold,
                         ),
                       ],
-                      const SizedBox(height: 14),
+                      const SizedBox(height: UiCoreSpacing.xl),
                       if (coordsReady) ...[
                         Row(
                           children: [
@@ -443,24 +446,24 @@ class _WeatherLoadedBody extends StatelessWidget {
                               color:
                                   SbColors.labelMuted.withValues(alpha: 0.9),
                             ),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: UiCoreSpacing.xsPlus),
                             Text(
                               'Animated satellite & radar',
                               style: mutedRow.copyWith(letterSpacing: 0.8),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: UiCoreSpacing.sm),
                         WeatherSatelliteMap(
                           latitude: latitude!,
                           longitude: longitude!,
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: UiCoreSpacing.xl),
                       ],
                       _divider(),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: UiCoreSpacing.md),
                       _sectionTitle(mutedRow, LucideIcons.thermometer, 'Comfort'),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: UiCoreSpacing.xsPlus),
                       _kv('Feels like', '${snapshot.apparentTempF.round()}°F', bodyStyle),
                       _kv('Dew point', '${snapshot.dewPointF.round()}°F', bodyStyle),
                       _kv('Humidity', '${snapshot.relativeHumidityPercent}%', bodyStyle),
@@ -472,14 +475,17 @@ class _WeatherLoadedBody extends StatelessWidget {
                             : 'Not available',
                         bodyStyle,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: UiCoreSpacing.md),
                       _sectionTitle(mutedRow, LucideIcons.wind, 'Wind'),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: UiCoreSpacing.xsPlus),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(right: 8, top: 2),
+                            padding: const EdgeInsets.only(
+                              right: UiCoreSpacing.sm,
+                              top: UiCoreSpacing.xxxs,
+                            ),
                             child: Icon(
                               LucideIcons.navigation,
                               size: 18,
@@ -492,7 +498,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                               children: [
                                 Text(_windLine(snapshot), style: bodyStyle),
                                 if (gustNote != null) ...[
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: UiCoreSpacing.xxsPlus),
                                   Text(gustNote, style: bodyStyle),
                                 ],
                               ],
@@ -500,19 +506,19 @@ class _WeatherLoadedBody extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: UiCoreSpacing.md),
                       _sectionTitle(
                         mutedRow,
                         LucideIcons.cloudRain,
                         'Precipitation (past hour)',
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: UiCoreSpacing.xsPlus),
                       _kv('Liquid (total)', _liquidPastHourLine(snapshot), bodyStyle),
                       _kv('Rain / showers', _rainBreakdown(snapshot), bodyStyle),
                       if (snowLine != null) _kv('Snow', snowLine, bodyStyle),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: UiCoreSpacing.md),
                       _sectionTitle(mutedRow, LucideIcons.airVent, 'Air'),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: UiCoreSpacing.xsPlus),
                       _kv(
                         'Pressure',
                         '${hPaToInHg(snapshot.pressureMslHpa).toStringAsFixed(2)} inHg '
@@ -525,23 +531,26 @@ class _WeatherLoadedBody extends StatelessWidget {
                         bodyStyle,
                       ),
                       if (snapshot.hourOutlook.isNotEmpty) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: UiCoreSpacing.lg),
                         _divider(),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: UiCoreSpacing.md),
                         _sectionTitle(
                           mutedRow,
                           LucideIcons.clock,
                           'Hourly outlook',
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: UiCoreSpacing.xsPlus),
                         ...snapshot.hourOutlook.map(
                           (h) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.only(bottom: UiCoreSpacing.sm),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 2, right: 8),
+                                  padding: const EdgeInsets.only(
+                                    top: UiCoreSpacing.xxxs,
+                                    right: UiCoreSpacing.sm,
+                                  ),
                                   child: Icon(
                                     _weatherGlyph(h.weatherCode, isDay: snapshot.isDay),
                                     size: 16,
@@ -562,7 +571,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 10),
+                      const SizedBox(height: UiCoreSpacing.md),
                       Text(
                         'Forecast data: Open-Meteo',
                         style: TextStyle(
@@ -603,7 +612,7 @@ class _InfoChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: SbColors.inningAccent.withValues(alpha: 0.88)),
-          const SizedBox(width: 6),
+          const SizedBox(width: UiCoreSpacing.xsPlus),
           Text(
             label,
             style: const TextStyle(
@@ -642,7 +651,7 @@ class _MetricGauge extends StatelessWidget {
         Row(
           children: [
             Icon(icon, size: 14, color: accent.withValues(alpha: 0.9)),
-            const SizedBox(width: 6),
+            const SizedBox(width: UiCoreSpacing.xsPlus),
             Expanded(
               child: Text(
                 label,
@@ -663,7 +672,7 @@ class _MetricGauge extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: UiCoreSpacing.xs),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -715,7 +724,7 @@ class _WeatherBannerBody extends ConsumerWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: UiCoreSpacing.md),
         Wrap(
           spacing: 8,
           runSpacing: 8,

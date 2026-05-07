@@ -97,6 +97,7 @@ abstract final class UiComponentTokens {
   static const double countIndicatorDiameter = 14;
   static const double topBarIconSize = 42;
   static const double topBarPillHeight = 42;
+  static const double weatherKeyValueLabelWidth = 132;
   static const double weatherSatelliteHeight = 188;
 }
 
