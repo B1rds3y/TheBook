@@ -53,10 +53,10 @@ BoxDecoration _topBarMutedCanvasDecoration({bool outlineBorder = false}) =>
 /// Hour/minute segment (and shared chrome labels like **Menu**).
 const TextStyle _topBarChromeDigitStyle = TextStyle(
   color: SbColors.textPrimary,
-  fontSize: 17,
+  fontSize: UiCoreTypography.titleMd + 1,
   fontWeight: FontWeight.w600,
   letterSpacing: 0.2,
-  height: 1.0,
+  height: UiCoreTypography.lineHeightTight,
 );
 
 class GameScreen extends ConsumerStatefulWidget {
@@ -615,7 +615,7 @@ class _LineScoreHeader extends StatelessWidget {
     color: SbColors.linescoreLabel,
     letterSpacing: 1.2,
     fontWeight: FontWeight.w600,
-    fontSize: 16,
+    fontSize: UiCoreTypography.titleMd,
   );
 
   final GameState state;
@@ -661,13 +661,13 @@ class _LineScoreHeader extends StatelessWidget {
                       style: const TextStyle(
                         color: SbColors.inningAccent,
                         fontWeight: FontWeight.w700,
-                        fontSize: 18,
+                        fontSize: UiCoreTypography.titleLg,
                       ),
                     ),
                     Text(
                       '${state.inning}',
                       style: const TextStyle(
-                        fontSize: 32,
+                        fontSize: UiCoreTypography.displaySm,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -713,7 +713,10 @@ class _LineScoreHeader extends StatelessWidget {
         const SizedBox(height: SbSpacing.metricBelowLabel),
         Text(
           '$runs',
-          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            fontSize: UiCoreTypography.displayMd,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );
@@ -1054,7 +1057,7 @@ class _CountPitchStrip extends StatelessWidget {
                     child: const Text(
                       'DEFENSIVE',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: UiCoreTypography.labelXs,
                         color: SbColors.defPitchesLabel,
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.w700,
@@ -1068,7 +1071,7 @@ class _CountPitchStrip extends StatelessWidget {
                     child: const Text(
                       'PITCHES',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: UiCoreTypography.labelXs,
                         color: SbColors.defPitchesLabel,
                         letterSpacing: 1.2,
                         fontWeight: FontWeight.w700,
@@ -1080,7 +1083,7 @@ class _CountPitchStrip extends StatelessWidget {
                   Text(
                     '$defensivePitchCount',
                     style: const TextStyle(
-                      fontSize: 26,
+                      fontSize: UiCoreTypography.titleXl,
                       fontWeight: FontWeight.w700,
                       color: SbColors.defPitchesValue,
                     ),
@@ -1159,7 +1162,7 @@ class _CountPitchStrip extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: fontSize,
-                                height: 1.05,
+                                height: UiCoreTypography.lineHeightMetric,
                                 fontWeight: FontWeight.w700,
                                 color: color,
                               ),
@@ -1280,7 +1283,7 @@ class _StackedBatterName extends StatelessWidget {
         style: TextStyle(
           fontSize: lastFontSize,
           fontWeight: FontWeight.w700,
-          height: 1,
+          height: UiCoreTypography.lineHeightTight,
           color: color,
         ),
       );
@@ -1307,7 +1310,7 @@ class _StackedBatterName extends StatelessWidget {
                   style: TextStyle(
                     fontSize: firstFontSize,
                     fontWeight: FontWeight.w600,
-                    height: 1,
+                    height: UiCoreTypography.lineHeightTight,
                     color: color,
                   ),
                 ),
@@ -1349,7 +1352,7 @@ class _StackedBatterName extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: jerseyFontSize,
-                      height: 1,
+                      height: UiCoreTypography.lineHeightTight,
                       color: color.withValues(alpha: 0.9),
                     ),
                   ),
@@ -1365,7 +1368,7 @@ class _StackedBatterName extends StatelessWidget {
               style: TextStyle(
                 fontSize: lastFontSize,
                 fontWeight: FontWeight.w700,
-                height: 1,
+                height: UiCoreTypography.lineHeightTight,
                 color: color,
               ),
             ),
@@ -1413,7 +1416,7 @@ class _AtBatRow extends StatelessWidget {
                   text: 'AT BAT ',
                   style: const TextStyle(
                     color: SbColors.labelMuted,
-                    fontSize: 12,
+                    fontSize: UiCoreTypography.labelMd,
                   ),
                   children: [
                     TextSpan(
@@ -1440,7 +1443,7 @@ class _AtBatRow extends StatelessWidget {
                 style: const TextStyle(
                   color: SbColors.statLineGold,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
+                  fontSize: UiCoreTypography.bodyMd,
                 ),
               ),
             ],
@@ -1462,7 +1465,7 @@ class _AtBatRow extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: SbColors.labelMuted,
-                  fontSize: 11,
+                  fontSize: UiCoreTypography.labelSm,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1479,7 +1482,7 @@ class _AtBatRow extends StatelessWidget {
                 style: TextStyle(
                   color: SbColors.onDeckStatLine,
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: UiCoreTypography.labelMd,
                 ),
               ),
             ],
@@ -1612,7 +1615,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       TextSpan(
                         style: const TextStyle(
                           color: SbColors.hitLabel,
-                          fontSize: 13,
+                          fontSize: UiCoreTypography.bodyMd,
                         ),
                         children: const [
                           TextSpan(
@@ -1634,7 +1637,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       TextSpan(
                         style: const TextStyle(
                           color: SbColors.hitLabel,
-                          fontSize: 13,
+                          fontSize: UiCoreTypography.bodyMd,
                         ),
                         children: const [
                           TextSpan(
@@ -1656,7 +1659,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       TextSpan(
                         style: const TextStyle(
                           color: SbColors.hitLabel,
-                          fontSize: 13,
+                          fontSize: UiCoreTypography.bodyMd,
                         ),
                         children: const [
                           TextSpan(
@@ -1678,7 +1681,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       TextSpan(
                         style: const TextStyle(
                           color: SbColors.hrLabel,
-                          fontSize: 13,
+                          fontSize: UiCoreTypography.bodyMd,
                         ),
                         children: const [
                           TextSpan(
@@ -1715,7 +1718,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       style: TextStyle(
                         color: SbColors.walkLabel,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: UiCoreTypography.bodyMd,
                       ),
                     ),
                   ),
@@ -1727,7 +1730,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       style: TextStyle(
                         color: SbColors.walkLabel,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: UiCoreTypography.bodyMd,
                       ),
                     ),
                   ),
@@ -1760,7 +1763,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       style: TextStyle(
                         color: SbColors.outLabel,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: UiCoreTypography.bodyMd,
                       ),
                     ),
                   ),
@@ -1775,7 +1778,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                             ? SbColors.textPrimary
                             : SbColors.labelMuted,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: UiCoreTypography.bodyMd,
                       ),
                     ),
                   ),
@@ -1787,7 +1790,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
                       style: TextStyle(
                         color: SbColors.sacrificeLabel,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: UiCoreTypography.bodyMd,
                       ),
                     ),
                   ),
@@ -1898,10 +1901,10 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: UiCoreTypography.titleMd,
                                 fontWeight: FontWeight.w700,
                                 color: widget.foreground,
-                                height: 1.1,
+                                height: UiCoreTypography.lineHeightBody,
                               ),
                             ),
                           ),
@@ -2006,7 +2009,7 @@ class _ActionRow extends StatelessWidget {
                 fontSize: titleSize,
                 fontWeight: FontWeight.w700,
                 color: fg,
-                height: 1.1,
+                height: UiCoreTypography.lineHeightBody,
               ),
             ),
           ),
@@ -2377,9 +2380,9 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.center,
                                   style: _topBarChromeDigitStyle.copyWith(
-                                    fontSize: 12,
+                                    fontSize: UiCoreTypography.labelMd,
                                     fontWeight: FontWeight.w500,
-                                    height: 1.0,
+                                    height: UiCoreTypography.lineHeightTight,
                                   ),
                                 ),
                             ],
@@ -2424,7 +2427,10 @@ class _TopTimeAndMenuBar extends StatelessWidget {
       const TextSpan(text: ' '),
       TextSpan(
         text: meridiem,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
+        style: const TextStyle(
+          fontSize: UiCoreTypography.labelXs,
+          fontWeight: FontWeight.w300,
+        ),
       ),
     ];
   }
@@ -2530,7 +2536,7 @@ class _TopBarClockState extends State<_TopBarClock> {
           TextSpan(
             text: meridiem,
             style: _topBarChromeDigitStyle.copyWith(
-              fontSize: 15,
+              fontSize: UiCoreTypography.titleMd - 1,
               fontWeight: FontWeight.w300,
             ),
           ),

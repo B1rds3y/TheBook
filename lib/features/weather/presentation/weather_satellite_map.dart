@@ -183,7 +183,7 @@ class _WeatherSatelliteMapState extends State<WeatherSatelliteMap>
                           : 'Satellite © Esri · Radar RainViewer (animated)',
                       style: TextStyle(
                         color: SbColors.labelMuted.withValues(alpha: 0.95),
-                        fontSize: 10,
+                        fontSize: UiCoreTypography.labelXs,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 2,

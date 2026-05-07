@@ -24,11 +24,20 @@ abstract final class UiCoreRadius {
 abstract final class UiCoreTypography {
   UiCoreTypography._();
 
+  static const double labelXs = 10;
   static const double labelSm = 11;
   static const double labelMd = 12;
   static const double bodyMd = 13;
   static const double titleMd = 16;
   static const double titleLg = 18;
+  static const double titleXl = 26;
+  static const double displaySm = 32;
+  static const double displayMd = 48;
+
+  static const double lineHeightTight = 1.0;
+  static const double lineHeightBody = 1.1;
+  static const double lineHeightMetric = 1.05;
+  static const double lineHeightRelaxed = 1.35;
 }
 
 abstract final class UiCoreMotion {

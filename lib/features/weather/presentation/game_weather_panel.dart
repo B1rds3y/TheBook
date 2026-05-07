@@ -244,7 +244,7 @@ class _WeatherLoadedBody extends StatelessWidget {
               style: TextStyle(
                 color: SbColors.labelMuted.withValues(alpha: 0.95),
                 fontWeight: FontWeight.w600,
-                height: 1.35,
+                height: UiCoreTypography.lineHeightRelaxed,
               ),
             ),
           ),
@@ -280,13 +280,13 @@ class _WeatherLoadedBody extends StatelessWidget {
 
     final mutedRow = TextStyle(
       color: SbColors.labelMuted.withValues(alpha: 0.9),
-      fontSize: 12,
+      fontSize: UiCoreTypography.labelMd,
       fontWeight: FontWeight.w600,
     );
     final bodyStyle = const TextStyle(
       color: SbColors.pbpBody,
       fontWeight: FontWeight.w500,
-      height: 1.35,
+      height: UiCoreTypography.lineHeightRelaxed,
     );
 
     final glyph = _weatherGlyph(snapshot.weatherCode, isDay: snapshot.isDay);
@@ -337,7 +337,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                           style: const TextStyle(
                             color: SbColors.textPrimary,
                             fontWeight: FontWeight.w700,
-                            fontSize: 18,
+                            fontSize: UiCoreTypography.titleLg,
                           ),
                         ),
                       ),
@@ -567,7 +567,7 @@ class _WeatherLoadedBody extends StatelessWidget {
                         'Forecast data: Open-Meteo',
                         style: TextStyle(
                           color: SbColors.labelMuted.withValues(alpha: 0.85),
-                          fontSize: 11,
+                          fontSize: UiCoreTypography.labelSm,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -609,7 +609,7 @@ class _InfoChip extends StatelessWidget {
             style: const TextStyle(
               color: SbColors.pbpBody,
               fontWeight: FontWeight.w600,
-              fontSize: 12,
+              fontSize: UiCoreTypography.labelMd,
             ),
           ),
         ],
@@ -649,7 +649,7 @@ class _MetricGauge extends StatelessWidget {
                 style: TextStyle(
                   color: SbColors.labelMuted.withValues(alpha: 0.95),
                   fontWeight: FontWeight.w700,
-                  fontSize: 12,
+                  fontSize: UiCoreTypography.labelMd,
                 ),
               ),
             ),
@@ -658,7 +658,7 @@ class _MetricGauge extends StatelessWidget {
               style: const TextStyle(
                 color: SbColors.textPrimary,
                 fontWeight: FontWeight.w700,
-                fontSize: 12,
+                fontSize: UiCoreTypography.labelMd,
               ),
             ),
           ],
