@@ -1,4 +1,5 @@
 import 'package:digital_scorebook_pro/app/ui/scoreboard_tokens.dart';
+import 'package:digital_scorebook_pro/app/ui/ui_tokens.dart';
 import 'package:digital_scorebook_pro/features/weather/application/weather_notifier.dart';
 import 'package:digital_scorebook_pro/features/weather/domain/weather_snapshot.dart';
 import 'package:digital_scorebook_pro/features/weather/presentation/weather_satellite_map.dart';
@@ -119,7 +120,7 @@ class _WeatherLoadingBody extends StatelessWidget {
           width: 18,
           height: 18,
           child: CircularProgressIndicator(
-            strokeWidth: 2,
+            strokeWidth: UiCoreStroke.thick,
             color: SbColors.inningAccent.withValues(alpha: 0.85),
           ),
         ),
@@ -392,7 +393,7 @@ class _WeatherLoadedBody extends StatelessWidget {
           ],
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 320),
+          duration: UiCoreMotion.weatherExpand,
           curve: Curves.easeInOutCubic,
           alignment: Alignment.topCenter,
           child: expanded
@@ -589,7 +590,10 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: UiCoreSpacing.md,
+        vertical: 6,
+      ),
       decoration: BoxDecoration(
         color: SbColors.circleControlFill,
         borderRadius: BorderRadius.circular(SbRadii.sm),

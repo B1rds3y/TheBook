@@ -5,6 +5,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:digital_scorebook_pro/app/theme_mode_notifier.dart';
 import 'package:digital_scorebook_pro/app/ui/popup_route_depth.dart';
 import 'package:digital_scorebook_pro/app/ui/scoreboard_tokens.dart';
+import 'package:digital_scorebook_pro/app/ui/ui_tokens.dart';
 import 'package:digital_scorebook_pro/features/game/application/game_notifier.dart';
 import 'package:digital_scorebook_pro/features/game/application/game_providers.dart';
 import 'package:digital_scorebook_pro/features/game/domain/game_state.dart';
@@ -45,7 +46,7 @@ BoxDecoration _topBarMutedCanvasDecoration({bool outlineBorder = false}) =>
       color: SbColors.canvas.withValues(alpha: 0.25),
       borderRadius: BorderRadius.circular(SbRadii.sm),
       border: outlineBorder
-          ? Border.all(color: SbColors.textPrimary, width: 0.5)
+          ? Border.all(color: SbColors.textPrimary, width: UiCoreStroke.hairline)
           : null,
     );
 
@@ -57,14 +58,6 @@ const TextStyle _topBarChromeDigitStyle = TextStyle(
   letterSpacing: 0.2,
   height: 1.0,
 );
-
-class KScreenBorder {
-  const KScreenBorder({required this.alpha, required this.sigma});
-  final double alpha;
-  final double sigma;
-}
-
-const kScreenBorder = KScreenBorder(alpha: 0, sigma: 22);
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
@@ -154,8 +147,8 @@ class _GameScreenState extends ConsumerState<GameScreen>
             ? embeddedChromeBodyHeight
             : desktopChromeBodyHeight);
 
-    const chromeSideT = 10.0;
-    const chromeBottomT = 10.0;
+    final chromeSideT = kScreenBorderTokens.sideInset;
+    final chromeBottomT = kScreenBorderTokens.bottomInset;
 
     return Scaffold(
       body: Container(
@@ -341,7 +334,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                             borderRadius: BorderRadius.circular(SbRadii.sm),
                             border: Border.all(
                               color: SbColors.pillBorder,
-                              width: 1,
+                              width: UiCoreStroke.thin,
                             ),
                           ),
                           child: Column(
@@ -524,8 +517,8 @@ class _GameScreenState extends ConsumerState<GameScreen>
                     fit: StackFit.expand,
                     children: [
                       _TopBarFrostedFill(
-                        blurSigma: kScreenBorder.sigma,
-                        fillOpacity: kScreenBorder.alpha,
+                        blurSigma: kScreenBorderTokens.sigma,
+                        fillOpacity: kScreenBorderTokens.alpha,
                         child: const SizedBox.expand(),
                       ),
                     ],
@@ -645,7 +638,7 @@ class _LineScoreHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(SbRadii.sm),
         border: Border.all(
           color: SbColors.pillBorder,
-          width: 1,
+          width: UiCoreStroke.thin,
         ),
       ),
       child: Row(
@@ -788,7 +781,11 @@ class _DiamondWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: SbColors.outfieldFill,
             borderRadius: BorderRadius.circular(SbRadii.sm),
-            border: Border.all(color: SbColors.pillBorder, width: 1),
+            border: Border.all(
+              color: SbColors.pillBorder,
+              width: UiCoreStroke.thin,
+            ),
+            
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -813,7 +810,7 @@ class _DiamondWidget extends StatelessWidget {
                               color: SbColors.infieldFill,
                               border: Border.all(
                                 color: SbColors.infieldBorder,
-                                width: 2,
+                                width: UiCoreStroke.thick,
                               ),
                             ),
                           ),
@@ -859,6 +856,7 @@ class _DiamondWidget extends StatelessWidget {
                   ? SbColors.baseSelectedBorder
                   : SbColors.baseIdleBorder,
               width: 1.5,
+              
             ),
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),
@@ -1204,7 +1202,7 @@ class _CountPitchStrip extends StatelessWidget {
                 color: on ? activeColor : Colors.transparent,
                 border: Border.all(
                   color: on ? activeColor : emptyBorder,
-                  width: 1.5,
+                  width: UiCoreStroke.medium,
                 ),
               ),
             ),
@@ -1324,7 +1322,7 @@ class _StackedBatterName extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: color.withValues(alpha: 0.4),
-                      width: 0.4,
+                      width: UiCoreStroke.micro,
                     ),
                   ),
                   child: Text.rich(
@@ -1513,7 +1511,7 @@ class _AtBatRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(SbRadii.sm),
         border: Border.all(
           color: SbColors.pillBorder,
-          width: 1,
+          width: UiCoreStroke.thin,
         ),
       ),
       child: rowContent,
@@ -1876,7 +1874,11 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
               child: Ink(
                 decoration: BoxDecoration(
                   color: fill,
-                  border: Border.all(color: widget.rim, width: 0.5),
+                  border: Border.all(
+                    color: widget.rim,
+                    width: UiCoreStroke.hairline,
+                  ),
+                  
                   borderRadius: radius,
                 ),
                 child: SizedBox(
@@ -1989,7 +1991,8 @@ class _ActionRow extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             color: fill,
-            border: Border.all(color: rim, width: 0.5),
+            border: Border.all(color: rim, width: UiCoreStroke.hairline),
+            
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -2160,13 +2163,13 @@ class _TopBarFrostedFill extends StatelessWidget {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(
-          sigmaX: blurSigma ?? kScreenBorder.sigma,
-          sigmaY: blurSigma ?? kScreenBorder.sigma,
+          sigmaX: blurSigma ?? kScreenBorderTokens.sigma,
+          sigmaY: blurSigma ?? kScreenBorderTokens.sigma,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: SbColors.canvas.withValues(
-              alpha: fillOpacity ?? kScreenBorder.alpha,
+              alpha: fillOpacity ?? kScreenBorderTokens.alpha,
             ),
           ),
           child: child,
@@ -2200,8 +2203,8 @@ class _TopTimeAndMenuBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TopBarFrostedFill(
-      blurSigma: kScreenBorder.sigma,
-      fillOpacity: kScreenBorder.alpha,
+      blurSigma: kScreenBorderTokens.sigma,
+      fillOpacity: kScreenBorderTokens.alpha,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           SbSpacing.topBarPadLeft,
@@ -2569,8 +2572,8 @@ class _TopActionBar extends StatelessWidget {
             SbLayout.topBarPillHeight +
             SbSpacing.topBarPadBottom;
         return _TopBarFrostedFill(
-          blurSigma: kScreenBorder.sigma,
-          fillOpacity: kScreenBorder.alpha,
+          blurSigma: kScreenBorderTokens.sigma,
+          fillOpacity: kScreenBorderTokens.alpha,
           child: Padding(
             padding: const EdgeInsets.only(
               left: SbSpacing.topBarPadLeft,

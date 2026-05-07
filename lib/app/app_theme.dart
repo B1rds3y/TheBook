@@ -1,4 +1,5 @@
 import 'package:digital_scorebook_pro/app/ui/scoreboard_tokens.dart';
+import 'package:digital_scorebook_pro/app/ui/ui_tokens.dart';
 import 'package:flutter/material.dart';
 
 /// Application themes aligned with [SbColors] / [SbRadii].
@@ -74,7 +75,10 @@ abstract final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: SbColors.outlineButtonFg,
-          side: const BorderSide(color: SbColors.outlineButtonBorder),
+          side: const BorderSide(
+            color: SbColors.outlineButtonBorder,
+            width: UiCoreEffects.actionChipBorderWidth,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),

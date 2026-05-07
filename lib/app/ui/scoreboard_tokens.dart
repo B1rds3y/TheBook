@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:digital_scorebook_pro/app/ui/ui_tokens.dart';
 
 /// Dark scoreboard palette and layout constants used by [GameScreen].
+/// Compatibility facade during migration to `ui_tokens.dart`.
 abstract final class SbColors {
   SbColors._();
 
-  static const Color canvas = Color(0xFF0B0D13);
+  static const Color canvas = UiSemanticColors.canvas;
 
-  static const Color divider = Color(0xFF222633);
+  static const Color divider = UiSemanticColors.divider;
 
-  static const Color inningAccent = Color(0xFF70A4FF);
+  static const Color inningAccent = UiSemanticColors.accentSoft;
 
   static const Color outsRingBorder = Color(0xFF4A4F5C);
   static const Color outsFilled = Color(0xFFFF4D4D);
@@ -64,8 +66,8 @@ abstract final class SbColors {
 
   static const Color labelMuted = Color(0xFFC8CDD8);
   static const Color teamTagAccent = Color(0xFF4593FF);
-  static const Color textPrimary = Color(0xFFF1F4FA);
-  static const Color statLineGold = Color(0xFFD59F3C);
+  static const Color textPrimary = UiSemanticColors.textPrimary;
+  static const Color statLineGold = UiSemanticColors.warning;
 
   /// Pitch row & FC / DP — neutral outlined chips (white labels).
   static const Color actionNeutralBorder = Color(0xFF6B7288);
@@ -111,20 +113,20 @@ abstract final class SbColors {
 abstract final class SbRadii {
   SbRadii._();
 
-  static const double sm = 10;
-  static const double md = 12;
-  static const double homePlate = 24;
+  static const double sm = UiCoreRadius.sm;
+  static const double md = UiCoreRadius.md;
+  static const double homePlate = UiCoreRadius.homePlate;
 }
 
 abstract final class SbSpacing {
   SbSpacing._();
 
-  static const double gutterXs = 3;
-  static const double gutterSm = 8;
-  static const double gutterMd = 10;
-  static const double gutterLg = 12;
-  static const double gutterXl = 14;
-  static const double gutterSection = 16;
+  static const double gutterXs = UiCoreSpacing.xxs;
+  static const double gutterSm = UiCoreSpacing.sm;
+  static const double gutterMd = UiCoreSpacing.md;
+  static const double gutterLg = UiCoreSpacing.lg;
+  static const double gutterXl = UiCoreSpacing.xl;
+  static const double gutterSection = UiCoreSpacing.section;
 
   static const double stripOuterH = 10;
   static const double stripInner = 10;
@@ -178,7 +180,7 @@ abstract final class SbPopupMenu {
 
   /// High enough that the blurred footprint reads over near-black [SbColors.canvas]
   /// (Material 3 menus default to elevation 3, which is nearly invisible here).
-  static const double elevation = 40;
+  static const double elevation = UiCoreEffects.popupShadowElevation;
 
   static const Color shadowDark = Color(0xFF000000);
 
@@ -192,19 +194,19 @@ abstract final class SbUnderPopup {
   SbUnderPopup._();
 
   /// Soft frosted read — visible but far lighter than early iterations (was ~5).
-  static const double bodyBlurSigma = 1.4;
+  static const double bodyBlurSigma = UiCoreEffects.underPopupBlurSigma;
 
-  static const double bodyScrimDark = 0.014;
+  static const double bodyScrimDark = UiCoreEffects.underPopupScrimDark;
 
-  static const double bodyScrimLight = 0.006;
+  static const double bodyScrimLight = UiCoreEffects.underPopupScrimLight;
 }
 
 abstract final class SbLayout {
   SbLayout._();
 
   static const double defPitchesBlockWidth = 102;
-  static const double actionChipBorderWidth = 1.25;
-  static const double actionChipFillOpacity = 0.2;
+  static const double actionChipBorderWidth = UiCoreEffects.actionChipBorderWidth;
+  static const double actionChipFillOpacity = UiCoreEffects.actionChipFillOpacity;
 
   /// Outline for pitch row, hit/walk/out chips, Error / FC — center-aligned stroke
   /// so width reads the same as [showMenu] rims (which use center stroke).
@@ -218,10 +220,10 @@ abstract final class SbLayout {
       Border.fromBorderSide(actionChipBorderSide(rim));
 
   /// Square size for 1st–3rd base tiles and height for single-line action chips.
-  static const double scoreboardTileExtent = 48;
+  static const double scoreboardTileExtent = UiComponentTokens.scoreboardTileExtent;
 
   /// Linescore outs dots + pitch-strip balls/strikes indicator dots (logical px).
-  static const double countIndicatorDiameter = 14;
+  static const double countIndicatorDiameter = UiComponentTokens.countIndicatorDiameter;
 
   /// Frosted left/right/bottom edge wrap thickness on the game screen.
   static const double chromeEdgeWrapThickness = 8;
@@ -238,14 +240,14 @@ abstract final class SbLayout {
 
   static const double actionButtonHeight = scoreboardTileExtent;
   static const double actionButtonHeightTwoLine = scoreboardTileExtent + 12;
-  static const double topBarIconSize = 42;
-  static const double topBarPillHeight = 42;
+  static const double topBarIconSize = UiComponentTokens.topBarIconSize;
+  static const double topBarPillHeight = UiComponentTokens.topBarPillHeight;
 }
 
 abstract final class SbDurations {
   SbDurations._();
 
-  static const Duration snackBarShort = Duration(milliseconds: 900);
+  static const Duration snackBarShort = UiCoreMotion.snackShort;
 }
 
 abstract final class SbBreakpoints {

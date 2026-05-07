@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:digital_scorebook_pro/app/ui/scoreboard_tokens.dart';
+import 'package:digital_scorebook_pro/app/ui/ui_tokens.dart';
 import 'package:digital_scorebook_pro/features/weather/data/rain_viewer_manifest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,7 +14,7 @@ class WeatherSatelliteMap extends StatefulWidget {
     super.key,
     required this.latitude,
     required this.longitude,
-    this.height = 188,
+    this.height = UiComponentTokens.weatherSatelliteHeight,
   });
 
   final double latitude;
@@ -39,11 +40,11 @@ class _WeatherSatelliteMapState extends State<WeatherSatelliteMap>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2600),
+      duration: UiCoreMotion.radarPulse,
     )..repeat(reverse: true);
 
     unawaited(_loadRadar());
-    _radarTimer = Timer.periodic(const Duration(milliseconds: 550), (_) {
+    _radarTimer = Timer.periodic(UiCoreMotion.radarFrameStep, (_) {
       if (!mounted || _radarPaths.isEmpty) {
         return;
       }
@@ -140,7 +141,7 @@ class _WeatherSatelliteMapState extends State<WeatherSatelliteMap>
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: SbColors.textPrimary.withValues(alpha: 0.9),
-                            width: 2,
+                            width: UiCoreStroke.thick,
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -162,9 +163,9 @@ class _WeatherSatelliteMapState extends State<WeatherSatelliteMap>
               ],
             ),
             Positioned(
-              left: 8,
-              bottom: 8,
-              right: 8,
+              left: UiCoreSpacing.sm,
+              bottom: UiCoreSpacing.sm,
+              right: UiCoreSpacing.sm,
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -172,7 +173,10 @@ class _WeatherSatelliteMapState extends State<WeatherSatelliteMap>
                     borderRadius: BorderRadius.circular(SbRadii.sm),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: UiCoreSpacing.md,
+                      vertical: 6,
+                    ),
                     child: Text(
                       _radarPaths.isEmpty
                           ? 'Satellite © Esri · Radar unavailable'
