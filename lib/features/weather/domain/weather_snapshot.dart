@@ -35,6 +35,7 @@ class WeatherSnapshot {
     required this.visibilityMiles,
     required this.isDay,
     required this.hourOutlook,
+    this.sunsetTime,
   });
 
   /// Model observation instant for current conditions.
@@ -71,6 +72,9 @@ class WeatherSnapshot {
 
   /// Next few hourly steps (temperature, precip chance, icon code).
   final List<HourOutlook> hourOutlook;
+
+  /// Local sunset time from forecast daily block when available.
+  final DateTime? sunsetTime;
 }
 
 /// Short labels for WMO weather interpretation codes returned by Open-Meteo.

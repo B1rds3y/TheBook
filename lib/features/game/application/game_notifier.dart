@@ -252,6 +252,141 @@ class GameNotifier extends Notifier<GameState> {
     _appendLog('Runner scored from base ${baseIndex + 1}');
   }
 
+  void resolveFieldersChoiceAtBase(int baseIndex) {
+    final runnerOut = state.bases[baseIndex];
+    if (runnerOut == null) {
+      return;
+    }
+
+    final batter = activeBatter;
+    final nextBases = List<Player?>.from(state.bases);
+    nextBases[baseIndex] = null;
+
+    int runs = 0;
+    if (nextBases[0] != null && nextBases[1] != null && nextBases[2] != null) {
+      runs = 1;
+    }
+    if (nextBases[1] != null && nextBases[0] != null) {
+      nextBases[2] = nextBases[1];
+    }
+    if (nextBases[0] != null) {
+      nextBases[1] = nextBases[0];
+    }
+    nextBases[0] = batter;
+
+    var nextOuts = state.outs + 1;
+    var nextInning = state.inning;
+    var nextIsTop = state.isTop;
+    var inningBases = List<Player?>.from(nextBases);
+
+    if (nextOuts >= 3) {
+      nextOuts = 0;
+      nextIsTop = !state.isTop;
+      if (!state.isTop) {
+        nextInning++;
+      }
+      inningBases = List<Player?>.filled(3, null);
+      runs = 0;
+    }
+
+    var nextState = _applyRuns(
+      state,
+      runs,
+    ).copyWith(
+      outs: nextOuts,
+      inning: nextInning,
+      isTop: nextIsTop,
+      bases: inningBases,
+      balls: 0,
+      strikes: 0,
+    );
+    nextState = _advanceBatterIndex(nextState);
+    _commit(nextState);
+    _appendLog(
+      "Outcome: FC — ${runnerOut.displayName} out at base ${baseIndex + 1}",
+    );
+  }
+
+  void recordDoublePlayFirstOut({required int? baseIndex, required bool batterOut}) {
+    final nextBases = List<Player?>.from(state.bases);
+    if (!batterOut && baseIndex != null) {
+      if (nextBases[baseIndex] == null) {
+        return;
+      }
+      nextBases[baseIndex] = null;
+    }
+
+    _commit(
+      state.copyWith(
+        outs: (state.outs + 1).clamp(0, 2),
+        bases: nextBases,
+        balls: 0,
+        strikes: 0,
+      ),
+    );
+    _appendLog('Double Play: first out recorded');
+  }
+
+  void recordDoublePlaySecondOut({
+    required int? baseIndex,
+    required bool batterOut,
+    required bool batterWasOutOnFirstTap,
+  }) {
+    final batter = activeBatter;
+    final nextBases = List<Player?>.from(state.bases);
+    if (!batterOut && baseIndex != null) {
+      if (nextBases[baseIndex] == null) {
+        return;
+      }
+      nextBases[baseIndex] = null;
+    }
+
+    final batterWasOut = batterWasOutOnFirstTap || batterOut;
+    var runs = 0;
+    if (!batterWasOut) {
+      if (nextBases[0] != null && nextBases[1] != null && nextBases[2] != null) {
+        runs = 1;
+      }
+      if (nextBases[1] != null && nextBases[0] != null) {
+        nextBases[2] = nextBases[1];
+      }
+      if (nextBases[0] != null) {
+        nextBases[1] = nextBases[0];
+      }
+      nextBases[0] = batter;
+    }
+
+    var nextOuts = state.outs + 1;
+    var nextInning = state.inning;
+    var nextIsTop = state.isTop;
+    var inningBases = List<Player?>.from(nextBases);
+
+    if (nextOuts >= 3) {
+      nextOuts = 0;
+      nextIsTop = !state.isTop;
+      if (!state.isTop) {
+        nextInning++;
+      }
+      inningBases = List<Player?>.filled(3, null);
+      runs = 0;
+    }
+
+    var nextState = _applyRuns(
+      state,
+      runs,
+    ).copyWith(
+      outs: nextOuts,
+      inning: nextInning,
+      isTop: nextIsTop,
+      bases: inningBases,
+      balls: 0,
+      strikes: 0,
+    );
+    nextState = _advanceBatterIndex(nextState);
+    _commit(nextState);
+    _appendLog('Outcome: DP');
+  }
+
   void _walkBatter() {
     final batter = activeBatter;
     final nextBases = List<Player?>.from(state.bases);

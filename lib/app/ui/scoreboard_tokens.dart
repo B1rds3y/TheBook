@@ -140,9 +140,9 @@ abstract final class SbSpacing {
   static const double actionButtonGap = 10;
 
   static const double linescoreHPad = 16;
-  static const double linescoreVPadTop = 10;
+  static const double linescoreVPadTop = 0;
   static const double linescoreVPadBottom = 8;
-  static const double metricBelowLabel = 6;
+  static const double metricBelowLabel = 5;
 
   static const double runnerPanelEdge = 16;
   static const double runnerPanelVPad = 8;
@@ -163,7 +163,7 @@ abstract final class SbSpacing {
 
   /// Tucks chrome slightly under the system-reported top inset on **iPhone** only.
   /// Safe Area itself cannot be negative; we reduce our *used* inset by this amount.
-  static const double iphoneTopInsetTrim = 50;
+  static const double iphoneTopInsetTrim = 40;
 
   static const double pillPadHCompact = 12;
   static const double pillPadHComfortable = 14;

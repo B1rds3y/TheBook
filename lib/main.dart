@@ -24,6 +24,7 @@ class KestrelKeepApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'Kestrel Keep',
+      debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

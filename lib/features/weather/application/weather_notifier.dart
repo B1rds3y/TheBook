@@ -80,7 +80,6 @@ class WeatherNotifier extends Notifier<WeatherState> {
       loading: true,
       banner: WeatherBannerKind.none,
       clearBannerDetail: true,
-      clearData: true,
     );
 
     try {

@@ -126,6 +126,22 @@ List<HourOutlook> _parseHourOutlook(
   return out;
 }
 
+DateTime? _parseSunsetTime(Map<String, dynamic> decoded) {
+  final daily = decoded['daily'];
+  if (daily is! Map<String, dynamic>) {
+    return null;
+  }
+  final sunsets = daily['sunset'];
+  if (sunsets is! List || sunsets.isEmpty) {
+    return null;
+  }
+  final first = sunsets.first;
+  if (first is! String) {
+    return null;
+  }
+  return DateTime.tryParse(first);
+}
+
 Future<WeatherSnapshot> fetchOpenMeteoCurrent({
   required double latitude,
   required double longitude,
@@ -148,6 +164,8 @@ Future<WeatherSnapshot> fetchOpenMeteoCurrent({
     'longitude': longitude.toStringAsFixed(5),
     'current': currentVars,
     'hourly': 'temperature_2m,precipitation_probability,weather_code',
+    'daily': 'sunset',
+    'forecast_days': '1',
     'forecast_hours': '24',
     'timezone': 'auto',
     'temperature_unit': 'fahrenheit',
@@ -219,6 +237,7 @@ Future<WeatherSnapshot> fetchOpenMeteoCurrent({
   final isDay = isDayRaw is num ? isDayRaw.round() != 0 : true;
 
   final hourly = _parseHourOutlook(decoded, maxHours: 8);
+  final sunsetTime = _parseSunsetTime(decoded);
 
   return WeatherSnapshot(
     observationTime: observationTime,
@@ -240,5 +259,6 @@ Future<WeatherSnapshot> fetchOpenMeteoCurrent({
     visibilityMiles: visibilityMi,
     isDay: isDay,
     hourOutlook: hourly,
+    sunsetTime: sunsetTime,
   );
 }
