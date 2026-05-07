@@ -15,8 +15,10 @@ abstract final class SbColors {
 
   static const Color linescoreLabel = Color(0xFFC2C7D4);
 
-  static const Color infieldFill = Color(0xFF21222C);
-  static const Color infieldBorder = Color(0xFF3A3C49);
+  static const Color infieldFill = Color(0xFF21201F);
+  static const Color infieldBorder = Color(0xFF3E3C41);
+
+  static const Color outfieldFill = Color(0xFF0C1514);
 
   static const Color baseIdleFill = Color(0xFF2A2C37);
   static const Color baseSelectedFill = Color(0xFF2D66D9);
@@ -41,7 +43,6 @@ abstract final class SbColors {
   static const Color outlineButtonBorder = Color(0xFF4A4F5C);
 
   static const Color pitchStripBg = Color(0xFF090B11);
-  static const Color defPitchesBlockBg = Colors.black;
   static const Color defPitchesLabel = Color(0xFFC9CFDB);
   static const Color defPitchesValue = Color(0xFF7FB0FF);
 
@@ -128,8 +129,9 @@ abstract final class SbSpacing {
   static const double stripOuterH = 10;
   static const double stripInner = 10;
   static const double atBatPanelMarginH = 10;
-  /// Gap between at-bat strip and diamond (was 8).
-  static const double atBatPanelMarginBottom = 0;
+
+  /// Space below the at-bat panel before the diamond ([gutterSection]).
+  static const double atBatPanelMarginBottom = gutterSection;
 
   static const double actionRowHPad = 12;
 
@@ -207,6 +209,17 @@ abstract final class SbLayout {
   static const double defPitchesBlockWidth = 102;
   static const double actionChipBorderWidth = 1.25;
   static const double actionChipFillOpacity = 0.2;
+
+  /// Outline for pitch row, hit/walk/out chips, Error / FC — center-aligned stroke
+  /// so width reads the same as [showMenu] rims (which use center stroke).
+  static BorderSide actionChipBorderSide(Color rim) => BorderSide(
+        color: rim,
+        width: actionChipBorderWidth,
+        strokeAlign: BorderSide.strokeAlignCenter,
+      );
+
+  static Border actionChipBorder(Color rim) =>
+      Border.fromBorderSide(actionChipBorderSide(rim));
 
   /// Square size for 1st–3rd base tiles and height for single-line action chips.
   static const double scoreboardTileExtent = 48;

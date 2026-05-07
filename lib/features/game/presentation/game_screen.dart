@@ -7,6 +7,8 @@ import 'package:digital_scorebook_pro/app/ui/popup_route_depth.dart';
 import 'package:digital_scorebook_pro/app/ui/scoreboard_tokens.dart';
 import 'package:digital_scorebook_pro/features/game/application/game_providers.dart';
 import 'package:digital_scorebook_pro/features/game/domain/game_state.dart';
+import 'package:digital_scorebook_pro/features/game/domain/player.dart';
+import 'package:digital_scorebook_pro/features/weather/presentation/game_weather_panel.dart';
 import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -152,9 +154,9 @@ class _GameScreenState extends ConsumerState<GameScreen>
                         _LineScoreHeader(state: gameState),
                         _AtBatRow(
                           isTop: gameState.isTop,
-                          batterName: activeBatter.name,
+                          atBat: activeBatter,
                           statLineText: 'Stats coming soon',
-                          onDeckName: onDeckBatter.name,
+                          onDeck: onDeckBatter,
                           onPrevious: () =>
                               _withHaptic(notifier.previousBatter),
                           onNext: () => _withHaptic(notifier.nextBatter),
@@ -261,48 +263,34 @@ class _GameScreenState extends ConsumerState<GameScreen>
                           onAction: _withHaptic,
                         ),
                         const SizedBox(height: SbSpacing.actionButtonGap),
-                        _BaseHitWalkedMenusRow(
+                        _BaseHitWalkedOutMenusRow(
                           onAction: _withHaptic,
                           onHit: notifier.logHit,
                           onWalkBalls: () => notifier.logOutcome('Walk'),
                           onHitByPitch: () => notifier.logOutcome('HBP'),
+                          onOutChoice: (choice) {
+                            switch (choice) {
+                              case _OutMenuChoice.fieldOut:
+                                notifier.logOutcome('Out');
+                              case _OutMenuChoice.doublePlay:
+                                notifier.logOutcome('DP');
+                              case _OutMenuChoice.sacrifice:
+                                notifier.logOutcome('SAC');
+                            }
+                          },
                         ),
                         const SizedBox(height: SbSpacing.actionButtonGap),
                         _ActionRow(
                           actions: [
-                            _ActionSpec(
-                              label: 'Field Out',
-                              onTap: () => notifier.logOutcome('Out'),
-                              accent: SbColors.outBorder,
-                              labelColor: SbColors.outLabel,
-                            ),
                             _ActionSpec(
                               label: 'Error (E)',
                               onTap: () => notifier.logOutcome('E'),
                               accent: SbColors.errorBorder,
                               labelColor: SbColors.errorLabel,
                             ),
-                          ],
-                          onAction: _withHaptic,
-                        ),
-                        const SizedBox(height: SbSpacing.actionButtonGap),
-                        _ActionRow(
-                          actions: [
-                            _ActionSpec(
-                              label: 'Sacrifice',
-                              onTap: () => notifier.logOutcome('SAC'),
-                              accent: SbColors.sacrificeBorder,
-                              labelColor: SbColors.sacrificeLabel,
-                            ),
                             _ActionSpec(
                               label: 'F. Choice',
                               onTap: () => notifier.logOutcome('FC'),
-                              accent: SbColors.textPrimary,
-                              labelColor: SbColors.textPrimary,
-                            ),
-                            _ActionSpec(
-                              label: 'Double Play',
-                              onTap: () => notifier.logOutcome('DP'),
                               accent: SbColors.textPrimary,
                               labelColor: SbColors.textPrimary,
                             ),
@@ -311,6 +299,8 @@ class _GameScreenState extends ConsumerState<GameScreen>
                         ),
                         const SizedBox(height: SbSpacing.gutterSection),
                         _PlayByPlayPanel(logs: gameState.playLogs),
+                        const SizedBox(height: SbSpacing.gutterSection),
+                        const GameWeatherPanel(),
                       ],
                     ),
                   );
@@ -636,6 +626,9 @@ class _DiamondWidget extends StatelessWidget {
   /// Vertical gutter above 2nd / below home (horizontal [_stackPadding] unchanged).
   static double get _stackPaddingVertical => 0;
 
+  /// Keeps home plate / base borders inside [ClipRRect] (layout + AA tight clip).
+  static const double _stackVertexMargin = 8;
+
   static double get _baseNameFontSize => 20 * _diamondScale;
   static double get _baseLabelLargeFontSize => 17 * _diamondScale;
   static double get _baseLabelSmallFontSize => 11 * _diamondScale;
@@ -648,39 +641,61 @@ class _DiamondWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final stackHalfX = _vertexRadius + _baseTileExtent / 2 + _stackPadding;
     final stackHalfY =
-        _vertexRadius + _baseTileExtent / 2 + _stackPaddingVertical;
+        _vertexRadius +
+        _baseTileExtent / 2 +
+        _stackPaddingVertical +
+        _stackVertexMargin;
     final stackWidth = stackHalfX * 2;
     final stackHeight = stackHalfY * 2;
     final vertexFractionX = _vertexRadius / stackHalfX;
     final vertexFractionY = _vertexRadius / stackHalfY;
 
-    return SizedBox(
-      height: stackHeight,
-      child: Center(
-        child: SizedBox(
-          width: stackWidth,
-          height: stackHeight,
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              Transform.rotate(
-                angle: math.pi / 4,
-                child: Container(
-                  width: _infieldSquareSide,
-                  height: _infieldSquareSide,
-                  decoration: BoxDecoration(
-                    color: SbColors.infieldFill,
-                    border: Border.all(color: SbColors.infieldBorder, width: 2),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SbSpacing.atBatPanelMarginH,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(SbRadii.sm),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: SbColors.outfieldFill,
+            borderRadius: BorderRadius.circular(SbRadii.sm),
+            border: Border.all(color: SbColors.pillBorder, width: 1),
+          ),
+          child: SizedBox(
+            height: stackHeight,
+            child: Center(
+              child: SizedBox(
+                width: stackWidth,
+                height: stackHeight,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Transform.rotate(
+                      angle: math.pi / 4,
+                      child: Container(
+                        width: _infieldSquareSide,
+                        height: _infieldSquareSide,
+                        decoration: BoxDecoration(
+                          color: SbColors.infieldFill,
+                          border: Border.all(
+                            color: SbColors.infieldBorder,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 3B (left), 2B (top), 1B (right), Home (bottom vertex).
+                    _baseTile(2, Alignment(-vertexFractionX, 0)),
+                    _baseTile(1, Alignment(0, -vertexFractionY)),
+                    _baseTile(0, Alignment(vertexFractionX, 0)),
+                    _homePlate(Alignment(0, vertexFractionY)),
+                  ],
                 ),
               ),
-              // 3B (left), 2B (top), 1B (right), Home (bottom vertex).
-              _baseTile(2, Alignment(-vertexFractionX, 0)),
-              _baseTile(1, Alignment(0, -vertexFractionY)),
-              _baseTile(0, Alignment(vertexFractionX, 0)),
-              _homePlate(Alignment(0, vertexFractionY)),
-            ],
+            ),
           ),
         ),
       ),
@@ -722,7 +737,7 @@ class _DiamondWidget extends StatelessWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        player.name,
+                        player.displayName,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         style: TextStyle(
@@ -895,10 +910,6 @@ class _CountPitchStrip extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                 horizontal: SbSpacing.gutterSm,
                 vertical: SbSpacing.gutterLg,
-              ),
-              decoration: BoxDecoration(
-                color: SbColors.defPitchesBlockBg,
-                borderRadius: BorderRadius.circular(SbRadii.md),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1094,20 +1105,79 @@ class _CountPitchStrip extends StatelessWidget {
   }
 }
 
+class _StackedBatterName extends StatelessWidget {
+  const _StackedBatterName({
+    required this.player,
+    required this.compact,
+    required this.onDeck,
+  });
+
+  final Player player;
+  final bool compact;
+  final bool onDeck;
+
+  @override
+  Widget build(BuildContext context) {
+    final lastFontSize =
+        onDeck ? (compact ? 22.0 : 27.0) : (compact ? 24.0 : 30.0);
+    final firstFontSize = lastFontSize * 0.5;
+    final color = onDeck ? SbColors.onDeckPlayerName : SbColors.textPrimary;
+
+    final first = player.firstName.trim();
+    final last = player.lastName.trim();
+    final stacked = first.isNotEmpty && last.isNotEmpty;
+    final primary = stacked ? last : (last.isNotEmpty ? last : first);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (stacked) ...[
+          Text(
+            first,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: firstFontSize,
+              fontWeight: FontWeight.w600,
+              height: 1,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+        ],
+        Text(
+          primary,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: lastFontSize,
+            fontWeight: FontWeight.w700,
+            height: 1,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _AtBatRow extends StatelessWidget {
   const _AtBatRow({
     required this.isTop,
-    required this.batterName,
+    required this.atBat,
     required this.statLineText,
-    required this.onDeckName,
+    required this.onDeck,
     required this.onPrevious,
     required this.onNext,
   });
 
   final bool isTop;
-  final String batterName;
+  final Player atBat;
   final String statLineText;
-  final String onDeckName;
+  final Player onDeck;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
 
@@ -1165,17 +1235,10 @@ class _AtBatRow extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                Text(
-                  batterName,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: compact ? 24 : 30,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                    color: SbColors.textPrimary,
-                  ),
+                _StackedBatterName(
+                  player: atBat,
+                  compact: compact,
+                  onDeck: false,
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -1210,17 +1273,10 @@ class _AtBatRow extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text(
-                  onDeckName,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: compact ? 22 : 27,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                    color: SbColors.onDeckPlayerName,
-                  ),
+                _StackedBatterName(
+                  player: onDeck,
+                  compact: compact,
+                  onDeck: true,
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -1271,14 +1327,30 @@ class _AtBatRow extends StatelessWidget {
 /// Matches Material [popup_menu.dart] `_kMenuScreenPadding`.
 const double _popupMenuScreenPadding = 8;
 
-double _estimatedPopupMenuHeight(BuildContext context, int itemCount) {
+double _estimatedPopupMenuHeightForEntries(
+  BuildContext context,
+  List<PopupMenuEntry<dynamic>> entries,
+) {
   final resolvedPadding =
       PopupMenuTheme.of(context).menuPadding?.resolve(
             Directionality.of(context),
           ) ??
           const EdgeInsets.symmetric(vertical: 8);
-  return resolvedPadding.vertical + itemCount * kMinInteractiveDimension;
+  var body = 0.0;
+  for (final e in entries) {
+    body += e.height;
+  }
+  return resolvedPadding.vertical + body;
 }
+
+/// Divider between rows in Base Hit / Walked / Out chip popup menus.
+PopupMenuDivider _actionChipPopupMenuDivider() => PopupMenuDivider(
+      height: 10,
+      thickness: 1,
+      indent: 12,
+      endIndent: 12,
+      color: SbColors.divider.withValues(alpha: 0.35),
+    );
 
 /// Gap between chip edge and menu when anchored above or below.
 const Offset _actionPopupMenuAnchorOffset = Offset(0, 6);
@@ -1288,11 +1360,10 @@ _chipPopupPlacement({
   required BuildContext routeContext,
   required RenderBox buttonBox,
   required RenderBox overlayBox,
-  required int itemCount,
+  required double menuHeight,
 }) {
   final mq = MediaQuery.of(routeContext);
   final gap = _actionPopupMenuAnchorOffset.dy;
-  final menuHeight = _estimatedPopupMenuHeight(routeContext, itemCount);
 
   // Global delta avoids `localToGlobal(..., ancestor: overlay)` edge cases when the
   // button isn’t under the same render subtree as [overlayBox].
@@ -1348,19 +1419,27 @@ enum _WalkMenuChoice {
   hitByPitch,
 }
 
-/// Split row: Base Hit menu (~50%) + Walked menu (~50%), matching [_ActionRow] padding.
-class _BaseHitWalkedMenusRow extends StatelessWidget {
-  const _BaseHitWalkedMenusRow({
+enum _OutMenuChoice {
+  fieldOut,
+  doublePlay,
+  sacrifice,
+}
+
+/// Single row: Base Hit | Walked | Out — equal widths, same padding as [_ActionRow].
+class _BaseHitWalkedOutMenusRow extends StatelessWidget {
+  const _BaseHitWalkedOutMenusRow({
     required this.onAction,
     required this.onHit,
     required this.onWalkBalls,
     required this.onHitByPitch,
+    required this.onOutChoice,
   });
 
   final Future<void> Function(VoidCallback action) onAction;
   final void Function(int bases) onHit;
   final VoidCallback onWalkBalls;
   final VoidCallback onHitByPitch;
+  final ValueChanged<_OutMenuChoice> onOutChoice;
 
   @override
   Widget build(BuildContext context) {
@@ -1371,51 +1450,98 @@ class _BaseHitWalkedMenusRow extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding:
-                  const EdgeInsets.only(right: SbSpacing.actionButtonGap / 2),
+              padding: const EdgeInsets.symmetric(
+                horizontal: SbSpacing.actionButtonGap / 2,
+              ),
               child: _OutlinedPopupMenuButton<int>(
                 label: 'Base Hit',
                 rim: SbColors.hitBorder,
                 foreground: SbColors.hitLabel,
-                menuItemCount: 4,
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: 1,
-                    child: Text(
-                      '1B — Single',
-                      style: TextStyle(
-                        color: SbColors.hitLabel,
-                        fontWeight: FontWeight.w600,
+                    child: Text.rich(
+                      TextSpan(
+                        style: const TextStyle(
+                          color: SbColors.hitLabel,
+                          fontSize: 13,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: 'Single ',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          TextSpan(
+                            text: '1B',
+                            style: TextStyle(fontWeight: FontWeight.w300),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                  _actionChipPopupMenuDivider(),
                   PopupMenuItem(
                     value: 2,
-                    child: Text(
-                      '2B — Double',
-                      style: TextStyle(
-                        color: SbColors.hitLabel,
-                        fontWeight: FontWeight.w600,
+                    child: Text.rich(
+                      TextSpan(
+                        style: const TextStyle(
+                          color: SbColors.hitLabel,
+                          fontSize: 13,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: 'Double ',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          TextSpan(
+                            text: '2B',
+                            style: TextStyle(fontWeight: FontWeight.w300),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                  _actionChipPopupMenuDivider(),
                   PopupMenuItem(
                     value: 3,
-                    child: Text(
-                      '3B — Triple',
-                      style: TextStyle(
-                        color: SbColors.hitLabel,
-                        fontWeight: FontWeight.w600,
+                    child: Text.rich(
+                      TextSpan(
+                        style: const TextStyle(
+                          color: SbColors.hitLabel,
+                          fontSize: 13,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: 'Triple ',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          TextSpan(
+                            text: '3B',
+                            style: TextStyle(fontWeight: FontWeight.w300),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                  _actionChipPopupMenuDivider(),
                   PopupMenuItem(
                     value: 4,
-                    child: Text(
-                      'HR — Home run',
-                      style: TextStyle(
-                        color: SbColors.hrLabel,
-                        fontWeight: FontWeight.w700,
+                    child: Text.rich(
+                      TextSpan(
+                        style: const TextStyle(
+                          color: SbColors.hrLabel,
+                          fontSize: 13,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: 'Home Run ',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          TextSpan(
+                            text: 'HR',
+                            style: TextStyle(fontWeight: FontWeight.w400),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -1426,13 +1552,13 @@ class _BaseHitWalkedMenusRow extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding:
-                  const EdgeInsets.only(left: SbSpacing.actionButtonGap / 2),
+              padding: const EdgeInsets.symmetric(
+                horizontal: SbSpacing.actionButtonGap / 2,
+              ),
               child: _OutlinedPopupMenuButton<_WalkMenuChoice>(
-                label: 'Walked',
+                label: 'Walk',
                 rim: SbColors.walkBorder,
                 foreground: SbColors.walkLabel,
-                menuItemCount: 2,
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: _WalkMenuChoice.baseOnBalls,
@@ -1441,9 +1567,11 @@ class _BaseHitWalkedMenusRow extends StatelessWidget {
                       style: TextStyle(
                         color: SbColors.walkLabel,
                         fontWeight: FontWeight.w600,
+                        fontSize: 13,
                       ),
                     ),
                   ),
+                  _actionChipPopupMenuDivider(),
                   PopupMenuItem(
                     value: _WalkMenuChoice.hitByPitch,
                     child: Text(
@@ -1451,6 +1579,7 @@ class _BaseHitWalkedMenusRow extends StatelessWidget {
                       style: TextStyle(
                         color: SbColors.walkLabel,
                         fontWeight: FontWeight.w600,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -1466,6 +1595,56 @@ class _BaseHitWalkedMenusRow extends StatelessWidget {
               ),
             ),
           ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SbSpacing.actionButtonGap / 2,
+              ),
+              child: _OutlinedPopupMenuButton<_OutMenuChoice>(
+                label: 'Out',
+                rim: SbColors.outBorder,
+                foreground: SbColors.outLabel,
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: _OutMenuChoice.fieldOut,
+                    child: Text(
+                      'Field Out',
+                      style: TextStyle(
+                        color: SbColors.outLabel,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  _actionChipPopupMenuDivider(),
+                  PopupMenuItem(
+                    value: _OutMenuChoice.doublePlay,
+                    child: Text(
+                      'Double Play',
+                      style: TextStyle(
+                        color: SbColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  _actionChipPopupMenuDivider(),
+                  PopupMenuItem(
+                    value: _OutMenuChoice.sacrifice,
+                    child: Text(
+                      'Sacrifice',
+                      style: TextStyle(
+                        color: SbColors.sacrificeLabel,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+                onSelected: (choice) => onAction(() => onOutChoice(choice)),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1478,7 +1657,6 @@ class _OutlinedPopupMenuButton<T> extends StatefulWidget {
     required this.rim,
     required this.foreground,
     required this.itemBuilder,
-    required this.menuItemCount,
     this.onSelected,
   });
 
@@ -1486,7 +1664,6 @@ class _OutlinedPopupMenuButton<T> extends StatefulWidget {
   final Color rim;
   final Color foreground;
   final PopupMenuItemBuilder<T> itemBuilder;
-  final int menuItemCount;
   final ValueChanged<T>? onSelected;
 
   @override
@@ -1497,67 +1674,57 @@ class _OutlinedPopupMenuButton<T> extends StatefulWidget {
 class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>> {
   final GlobalKey _buttonKey = GlobalKey();
 
-  RenderBox? _cachedButtonRenderBox;
-  RenderBox? _cachedOverlayRenderBox;
-
   bool _menuOpen = false;
   bool _opensTowardBottom = true;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _cacheOverlayTargets();
-  }
-
-  void _cacheOverlayTargets() {
-    final buttonRo = _buttonKey.currentContext?.findRenderObject();
-    if (buttonRo is RenderBox) {
-      _cachedButtonRenderBox = buttonRo;
-    }
-    try {
-      final navigator = Navigator.of(context);
-      final overlayRo = navigator.overlay?.context.findRenderObject();
-      if (overlayRo is RenderBox) {
-        _cachedOverlayRenderBox = overlayRo;
-      }
-    } catch (_) {
-      _cachedButtonRenderBox = null;
-      _cachedOverlayRenderBox = null;
-    }
-  }
+  /// Extra height reserved when deciding above vs below so post-layout clamping
+  /// does not slide the menu back over the chip ([_PopupMenuRouteLayout] fit).
+  static const double _placementMenuHeightMargin = 10;
 
   RelativeRect _menuPositionBuilder(
     BuildContext routeContext,
-    BoxConstraints constraints,
-  ) {
-    final button = _cachedButtonRenderBox;
-    final overlay = _cachedOverlayRenderBox;
-    if (button == null ||
-        overlay == null ||
+    BoxConstraints constraints, {
+    required double placementMenuHeight,
+  }) {
+    final button = _buttonKey.currentContext?.findRenderObject();
+    if (button is! RenderBox ||
         !button.attached ||
-        !overlay.attached ||
         !button.hasSize) {
+      return RelativeRect.fill;
+    }
+    final navigator = Navigator.of(routeContext);
+    final overlay = navigator.overlay?.context.findRenderObject();
+    if (overlay is! RenderBox ||
+        !overlay.attached ||
+        !overlay.hasSize) {
       return RelativeRect.fill;
     }
     final p = _chipPopupPlacement(
       routeContext: routeContext,
       buttonBox: button,
       overlayBox: overlay,
-      itemCount: widget.menuItemCount,
+      menuHeight: placementMenuHeight,
     );
     final anchorRect = Rect.fromLTWH(p.anchorLeft, p.menuTop, p.anchorWidth, 1);
-    return RelativeRect.fromRect(anchorRect, Offset.zero & overlay.size);
+    final containerSize = Size(
+      constraints.hasBoundedWidth ? constraints.biggest.width : overlay.size.width,
+      constraints.hasBoundedHeight ? constraints.biggest.height : overlay.size.height,
+    );
+    return RelativeRect.fromRect(anchorRect, Offset.zero & containerSize);
   }
 
   Future<void> _openMenu() async {
-    _cacheOverlayTargets();
-    final button = _cachedButtonRenderBox;
-    final overlay = _cachedOverlayRenderBox;
-    if (button == null ||
-        overlay == null ||
+    final button = _buttonKey.currentContext?.findRenderObject();
+    if (button is! RenderBox ||
         !button.attached ||
-        !overlay.attached ||
         !button.hasSize) {
+      return;
+    }
+    final navigator = Navigator.of(context);
+    final overlay = navigator.overlay?.context.findRenderObject();
+    if (overlay is! RenderBox ||
+        !overlay.attached ||
+        !overlay.hasSize) {
       return;
     }
 
@@ -1566,11 +1733,14 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
       return;
     }
 
+    final menuHeight = _estimatedPopupMenuHeightForEntries(context, items);
+    final placementMenuHeight = menuHeight + _placementMenuHeightMargin;
+
     final placement = _chipPopupPlacement(
       routeContext: context,
       buttonBox: button,
       overlayBox: overlay,
-      itemCount: widget.menuItemCount,
+      menuHeight: placementMenuHeight,
     );
 
     final chipWidth = button.size.width;
@@ -1584,35 +1754,40 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
     });
 
     final brightness = Theme.of(context).brightness;
-    final selected = await showMenu<T>(
-      context: context,
-      positionBuilder: _menuPositionBuilder,
-      items: items,
-      elevation: SbPopupMenu.elevation,
-      shadowColor: brightness == Brightness.dark
-          ? SbPopupMenu.shadowDark
-          : SbPopupMenu.shadowLight,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(SbRadii.md),
-        side: BorderSide(
-          color: widget.rim,
-          width: SbLayout.actionChipBorderWidth,
-          strokeAlign: BorderSide.strokeAlignCenter,
+    try {
+      final selected = await showMenu<T>(
+        context: context,
+        positionBuilder: (routeContext, constraints) => _menuPositionBuilder(
+          routeContext,
+          constraints,
+          placementMenuHeight: placementMenuHeight,
         ),
-      ),
-      color: SbColors.atBatPanelFill,
-      constraints: menuConstraints,
-      clipBehavior: Clip.none,
-    );
+        items: items,
+        elevation: SbPopupMenu.elevation,
+        shadowColor: brightness == Brightness.dark
+            ? SbPopupMenu.shadowDark
+            : SbPopupMenu.shadowLight,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SbRadii.md),
+        side: SbLayout.actionChipBorderSide(widget.rim),
+        ),
+        color: SbColors.atBatPanelFill,
+        constraints: menuConstraints,
+        clipBehavior: Clip.none,
+      );
 
-    if (!mounted) {
-      return;
-    }
-    setState(() => _menuOpen = false);
+      if (!mounted) {
+        return;
+      }
 
-    if (selected != null) {
-      widget.onSelected?.call(selected);
+      if (selected != null) {
+        widget.onSelected?.call(selected);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _menuOpen = false);
+      }
     }
   }
 
@@ -1633,16 +1808,15 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
       child: Material(
         key: _buttonKey,
         color: Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: _openMenu,
           borderRadius: radius,
           child: Ink(
             decoration: BoxDecoration(
               color: fill,
-              border: Border.all(
-                color: widget.rim,
-                width: SbLayout.actionChipBorderWidth,
-              ),
+              border: SbLayout.actionChipBorder(widget.rim),
               borderRadius: radius,
             ),
             child: SizedBox(
@@ -1752,10 +1926,7 @@ class _ActionRow extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             color: fill,
-            border: Border.all(
-              color: rim,
-              width: SbLayout.actionChipBorderWidth,
-            ),
+            border: SbLayout.actionChipBorder(rim),
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 4),

@@ -8,26 +8,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class GameNotifier extends Notifier<GameState> {
   final List<GameState> _history = <GameState>[];
   final List<Player> _awayLineup = const <Player>[
-    Player(name: 'Wes'),
-    Player(name: 'Jaxon'),
-    Player(name: 'Carter'),
-    Player(name: 'Mason'),
-    Player(name: 'Noah'),
-    Player(name: 'Brody'),
-    Player(name: 'Caleb'),
-    Player(name: 'Levi'),
-    Player(name: 'Liam'),
+    Player(firstName: 'Wes', lastName: 'Birdsey'),
+    Player(firstName: '', lastName: 'Jaxon'),
+    Player(firstName: '', lastName: 'Carter'),
+    Player(firstName: '', lastName: 'Mason'),
+    Player(firstName: '', lastName: 'Noah'),
+    Player(firstName: '', lastName: 'Brody'),
+    Player(firstName: '', lastName: 'Caleb'),
+    Player(firstName: '', lastName: 'Levi'),
+    Player(firstName: '', lastName: 'Liam'),
   ];
   final List<Player> _homeLineup = const <Player>[
-    Player(name: 'Davis'),
-    Player(name: 'Hudson'),
-    Player(name: 'Micah'),
-    Player(name: 'Briggs'),
-    Player(name: 'Eli'),
-    Player(name: 'Cooper'),
-    Player(name: 'Tate'),
-    Player(name: 'Wyatt'),
-    Player(name: 'Hayes'),
+    Player(firstName: '', lastName: 'Davis'),
+    Player(firstName: '', lastName: 'Hudson'),
+    Player(firstName: '', lastName: 'Micah'),
+    Player(firstName: '', lastName: 'Briggs'),
+    Player(firstName: '', lastName: 'Eli'),
+    Player(firstName: '', lastName: 'Cooper'),
+    Player(firstName: '', lastName: 'Tate'),
+    Player(firstName: '', lastName: 'Wyatt'),
+    Player(firstName: '', lastName: 'Hayes'),
   ];
 
   String _cloudGameId = 'local-active-game';
@@ -204,21 +204,21 @@ class GameNotifier extends Notifier<GameState> {
     ).copyWith(bases: nextBases, balls: 0, strikes: 0);
     nextState = _advanceBatterIndex(nextState);
     _commit(nextState);
-    _appendLog('Hit: ${basesTaken}B by ${batter.name}');
+    _appendLog('Hit: ${basesTaken}B by ${batter.displayName}');
   }
 
   void logOutcome(String outcome) {
     if (outcome == 'BB' || outcome == 'Walk') {
       final walked = activeBatter;
       _walkBatter();
-      _appendLog('Walk issued to ${walked.name}');
+      _appendLog('Walk issued to ${walked.displayName}');
       return;
     }
 
     if (outcome == 'HBP') {
       final batter = activeBatter;
       _walkBatter();
-      _appendLog('Hit by pitch — ${batter.name} takes first base');
+      _appendLog('Hit by pitch — ${batter.displayName} takes first base');
       return;
     }
 

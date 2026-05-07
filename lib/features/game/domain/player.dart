@@ -1,7 +1,28 @@
 class Player {
-  const Player({required this.name});
+  const Player({
+    required this.firstName,
+    required this.lastName,
+  });
 
-  final String name;
+  final String firstName;
+  final String lastName;
 
-  Map<String, dynamic> toJson() => {'name': name};
+  /// Logs and runner tiles — `"Given Family"` or a single side when the other is empty.
+  String get displayName {
+    final first = firstName.trim();
+    final last = lastName.trim();
+    if (first.isEmpty) {
+      return last.isEmpty ? '' : last;
+    }
+    if (last.isEmpty) {
+      return first;
+    }
+    return '$first $last';
+  }
+
+  Map<String, dynamic> toJson() => {
+        'firstName': firstName,
+        'lastName': lastName,
+        'name': displayName,
+      };
 }
