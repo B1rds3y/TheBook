@@ -20,12 +20,19 @@ class WeatherState {
   const WeatherState({
     this.loading = false,
     this.data,
+    this.latitude,
+    this.longitude,
     this.banner = WeatherBannerKind.none,
     this.bannerDetail,
   });
 
   final bool loading;
   final WeatherSnapshot? data;
+
+  /// Last successful fix (degrees); used for satellite / radar map pin.
+  final double? latitude;
+  final double? longitude;
+
   final WeatherBannerKind banner;
   final String? bannerDetail;
 
@@ -36,10 +43,14 @@ class WeatherState {
     WeatherBannerKind? banner,
     String? bannerDetail,
     bool clearBannerDetail = false,
+    double? latitude,
+    double? longitude,
   }) {
     return WeatherState(
       loading: loading ?? this.loading,
       data: clearData ? null : (data ?? this.data),
+      latitude: clearData ? null : (latitude ?? this.latitude),
+      longitude: clearData ? null : (longitude ?? this.longitude),
       banner: banner ?? this.banner,
       bannerDetail: clearBannerDetail
           ? null
@@ -122,6 +133,8 @@ class WeatherNotifier extends Notifier<WeatherState> {
       state = WeatherState(
         loading: false,
         data: snapshot,
+        latitude: position.latitude,
+        longitude: position.longitude,
         banner: WeatherBannerKind.none,
       );
     } catch (e, stackTrace) {

@@ -48,42 +48,42 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
-      "deviceId": "iPhone 17"
+      "deviceId": "56ABCF48-A7CB-4468-A7E0-D5D521AE65C8"
     },
     {
       "name": "Flutter: iOS Simulator (iPhone 17) Profile",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile",
-      "deviceId": "iPhone 17"
+      "deviceId": "56ABCF48-A7CB-4468-A7E0-D5D521AE65C8"
     },
     {
       "name": "Flutter: iOS Simulator (iPhone 17) Release",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release",
-      "deviceId": "iPhone 17"
+      "deviceId": "56ABCF48-A7CB-4468-A7E0-D5D521AE65C8"
     },
     {
       "name": "Flutter: iOS Simulator (iPad Pro 13-inch) Debug",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
-      "deviceId": "iPad Pro 13-inch"
+      "deviceId": "1155DE49-7AA7-4832-80F4-DA52EFE470F4"
     },
     {
       "name": "Flutter: iOS Simulator (iPad Pro 13-inch) Profile",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile",
-      "deviceId": "iPad Pro 13-inch"
+      "deviceId": "1155DE49-7AA7-4832-80F4-DA52EFE470F4"
     },
     {
       "name": "Flutter: iOS Simulator (iPad Pro 13-inch) Release",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release",
-      "deviceId": "iPad Pro 13-inch"
+      "deviceId": "1155DE49-7AA7-4832-80F4-DA52EFE470F4"
     }
   ]
 }

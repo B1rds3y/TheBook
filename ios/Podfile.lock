@@ -9,6 +9,9 @@ PODS:
   - flutter_webrtc (1.4.0):
     - Flutter
     - WebRTC-SDK (= 144.7559.01)
+  - geolocator_apple (1.2.0):
+    - Flutter
+    - FlutterMacOS
   - WebRTC-SDK (144.7559.01)
 
 DEPENDENCIES:
@@ -17,6 +20,7 @@ DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -33,6 +37,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/darwin"
 
 SPEC CHECKSUMS:
   camera_avfoundation: 968a9a5323c79a99c166ad9d7866bfd2047b5a9b
@@ -40,6 +46,7 @@ SPEC CHECKSUMS:
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_webrtc: ec91d94b484ad49cf191ef93413f64a40ffd3b4c
+  geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   WebRTC-SDK: ab9b5319e458c2bfebdc92b3600740da35d5630d
 
 PODFILE CHECKSUM: c5714cc7a0136ee60f7fc0458c3f5839a0c04db8

@@ -130,8 +130,8 @@ abstract final class SbSpacing {
   static const double stripInner = 10;
   static const double atBatPanelMarginH = 10;
 
-  /// Space below the at-bat panel before the diamond ([gutterSection]).
-  static const double atBatPanelMarginBottom = gutterSection;
+  /// Space below the at-bat panel before the diamond; matches linescore-to-atbat gap.
+  static const double atBatPanelMarginBottom = linescoreVPadBottom;
 
   static const double actionRowHPad = 12;
 
@@ -146,10 +146,6 @@ abstract final class SbSpacing {
 
   static const double runnerPanelEdge = 16;
   static const double runnerPanelVPad = 8;
-
-  /// Visual overlap of the pitch/count strip into the diamond stack’s bottom
-  /// inset (home plate is shorter than base pads, leaving slack below home).
-  static const double countPitchStripPullUp = 12;
 
   static const double playByPlayHPad = 14;
   static const double playByPlayVPadBottom = 14;

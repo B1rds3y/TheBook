@@ -152,15 +152,6 @@ class _GameScreenState extends ConsumerState<GameScreen>
                     child: Column(
                       children: [
                         _LineScoreHeader(state: gameState),
-                        _AtBatRow(
-                          isTop: gameState.isTop,
-                          atBat: activeBatter,
-                          statLineText: 'Stats coming soon',
-                          onDeck: onDeckBatter,
-                          onPrevious: () =>
-                              _withHaptic(notifier.previousBatter),
-                          onNext: () => _withHaptic(notifier.nextBatter),
-                        ),
                         _DiamondWidget(
                           state: gameState,
                           selectedBase: _selectedBase,
@@ -173,6 +164,17 @@ class _GameScreenState extends ConsumerState<GameScreen>
                             });
                           },
                         ),
+                        const SizedBox(height: SbSpacing.linescoreVPadBottom),
+                        _AtBatRow(
+                          isTop: gameState.isTop,
+                          atBat: activeBatter,
+                          statLineText: 'Stats coming soon',
+                          onDeck: onDeckBatter,
+                          onPrevious: () =>
+                              _withHaptic(notifier.previousBatter),
+                          onNext: () => _withHaptic(notifier.nextBatter),
+                        ),
+                        const SizedBox(height: SbSpacing.gutterSection),
                         if (_selectedBase != null)
                           Padding(
                             padding: const EdgeInsets.symmetric(
@@ -219,24 +221,16 @@ class _GameScreenState extends ConsumerState<GameScreen>
                               },
                             ),
                           ),
-                        Transform.translate(
-                          offset: Offset(
-                            0,
-                            _selectedBase != null
-                                ? 0
-                                : -SbSpacing.countPitchStripPullUp,
-                          ),
-                          child: _CountPitchStrip(
-                            state: gameState,
-                            onBallMinus: () =>
-                                _withHaptic(notifier.decrementBalls),
-                            onBallPlus: () =>
-                                _withHaptic(notifier.incrementBalls),
-                            onStrikeMinus: () =>
-                                _withHaptic(notifier.decrementStrikes),
-                            onStrikePlus: () =>
-                                _withHaptic(notifier.incrementStrikes),
-                          ),
+                        _CountPitchStrip(
+                          state: gameState,
+                          onBallMinus: () =>
+                              _withHaptic(notifier.decrementBalls),
+                          onBallPlus: () =>
+                              _withHaptic(notifier.incrementBalls),
+                          onStrikeMinus: () =>
+                              _withHaptic(notifier.decrementStrikes),
+                          onStrikePlus: () =>
+                              _withHaptic(notifier.incrementStrikes),
                         ),
                         const SizedBox(height: SbSpacing.actionButtonGap),
                         _ActionRow(
@@ -289,7 +283,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                               labelColor: SbColors.errorLabel,
                             ),
                             _ActionSpec(
-                              label: 'F. Choice',
+                              label: "Fielder's Choice",
                               onTap: () => notifier.logOutcome('FC'),
                               accent: SbColors.textPrimary,
                               labelColor: SbColors.textPrimary,
@@ -414,18 +408,31 @@ class _LineScoreHeader extends StatelessWidget {
     color: SbColors.linescoreLabel,
     letterSpacing: 1.2,
     fontWeight: FontWeight.w600,
+    fontSize: 16,
   );
 
   final GameState state;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        SbSpacing.linescoreHPad,
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        SbSpacing.atBatPanelMarginH,
         SbSpacing.linescoreVPadTop,
-        SbSpacing.linescoreHPad,
+        SbSpacing.atBatPanelMarginH,
         SbSpacing.linescoreVPadBottom,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: SbSpacing.stripInner,
+        vertical: SbSpacing.stripInner,
+      ),
+      decoration: BoxDecoration(
+        color: SbColors.atBatPanelFill,
+        borderRadius: BorderRadius.circular(SbRadii.sm),
+        border: Border.all(
+          color: SbColors.pillBorder,
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -433,17 +440,26 @@ class _LineScoreHeader extends StatelessWidget {
             child: _scoreBlock(label: 'AWAY', runs: state.awayRuns),
           ),
           Expanded(
-            child: Column(
+            child: LayoutBuilder(
+              builder: (context, constraints) => Column(
               children: [
                 Text('INNING', style: _scoreLabelStyle),
                 const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List<Widget>.generate(
-                    9,
-                    (i) => Padding(
-                      padding: EdgeInsets.only(left: i > 0 ? 4 : 0),
-                      child: _InningDot(fill: _inningDotFill(i + 1, state)),
+                SizedBox(
+                  width: constraints.maxWidth,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List<Widget>.generate(
+                        9,
+                        (i) => Padding(
+                          padding: EdgeInsets.only(left: i > 0 ? 4 : 0),
+                          child: _InningDot(fill: _inningDotFill(i + 1, state)),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -457,12 +473,13 @@ class _LineScoreHeader extends StatelessWidget {
                       style: const TextStyle(
                         color: SbColors.inningAccent,
                         fontWeight: FontWeight.w700,
+                        fontSize: 18,
                       ),
                     ),
                     Text(
                       '${state.inning}',
                       style: const TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -491,6 +508,7 @@ class _LineScoreHeader extends StatelessWidget {
                 ),
               ],
             ),
+            ),
           ),
           Expanded(
             child: _scoreBlock(label: 'HOME', runs: state.homeRuns),
@@ -507,7 +525,7 @@ class _LineScoreHeader extends StatelessWidget {
         const SizedBox(height: SbSpacing.metricBelowLabel),
         Text(
           '$runs',
-          style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700),
         ),
       ],
     );
@@ -623,11 +641,11 @@ class _DiamondWidget extends StatelessWidget {
   static double get _homePlateHeight => 56 * _diamondScale;
   static double get _stackPadding => 8 * _diamondScale;
 
-  /// Vertical gutter above 2nd / below home (horizontal [_stackPadding] unchanged).
+  /// Vertical inset above 2nd and below home.
   static double get _stackPaddingVertical => 0;
 
-  /// Keeps home plate / base borders inside [ClipRRect] (layout + AA tight clip).
-  static const double _stackVertexMargin = 8;
+  /// Additional AA safety margin (kept at zero; inset handled by [_stackPaddingVertical]).
+  static const double _stackVertexMargin = 0;
 
   static double get _baseNameFontSize => 20 * _diamondScale;
   static double get _baseLabelLargeFontSize => 17 * _diamondScale;
@@ -663,39 +681,46 @@ class _DiamondWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(SbRadii.sm),
             border: Border.all(color: SbColors.pillBorder, width: 1),
           ),
-          child: SizedBox(
-            height: stackHeight,
-            child: Center(
-              child: SizedBox(
-                width: stackWidth,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
                 height: stackHeight,
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Transform.rotate(
-                      angle: math.pi / 4,
-                      child: Container(
-                        width: _infieldSquareSide,
-                        height: _infieldSquareSide,
-                        decoration: BoxDecoration(
-                          color: SbColors.infieldFill,
-                          border: Border.all(
-                            color: SbColors.infieldBorder,
-                            width: 2,
+                width: double.infinity,
+                child: Center(
+                  child: SizedBox(
+                    width: stackWidth,
+                    height: stackHeight,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        Transform.rotate(
+                          angle: math.pi / 4,
+                          child: Container(
+                            width: _infieldSquareSide,
+                            height: _infieldSquareSide,
+                            decoration: BoxDecoration(
+                              color: SbColors.infieldFill,
+                              border: Border.all(
+                                color: SbColors.infieldBorder,
+                                width: 2,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        // 3B (left), 2B (top), 1B (right), Home (bottom vertex).
+                        _baseTile(2, Alignment(-vertexFractionX, 0)),
+                        _baseTile(1, Alignment(0, -vertexFractionY)),
+                        _baseTile(0, Alignment(vertexFractionX, 0)),
+                        _homePlate(Alignment(0, vertexFractionY)),
+                      ],
                     ),
-                    // 3B (left), 2B (top), 1B (right), Home (bottom vertex).
-                    _baseTile(2, Alignment(-vertexFractionX, 0)),
-                    _baseTile(1, Alignment(0, -vertexFractionY)),
-                    _baseTile(0, Alignment(vertexFractionX, 0)),
-                    _homePlate(Alignment(0, vertexFractionY)),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              SizedBox(height: SbSpacing.gutterMd),
+            ],
           ),
         ),
       ),
@@ -1324,25 +1349,6 @@ class _AtBatRow extends StatelessWidget {
   }
 }
 
-/// Matches Material [popup_menu.dart] `_kMenuScreenPadding`.
-const double _popupMenuScreenPadding = 8;
-
-double _estimatedPopupMenuHeightForEntries(
-  BuildContext context,
-  List<PopupMenuEntry<dynamic>> entries,
-) {
-  final resolvedPadding =
-      PopupMenuTheme.of(context).menuPadding?.resolve(
-            Directionality.of(context),
-          ) ??
-          const EdgeInsets.symmetric(vertical: 8);
-  var body = 0.0;
-  for (final e in entries) {
-    body += e.height;
-  }
-  return resolvedPadding.vertical + body;
-}
-
 /// Divider between rows in Base Hit / Walked / Out chip popup menus.
 PopupMenuDivider _actionChipPopupMenuDivider() => PopupMenuDivider(
       height: 10,
@@ -1354,65 +1360,6 @@ PopupMenuDivider _actionChipPopupMenuDivider() => PopupMenuDivider(
 
 /// Gap between chip edge and menu when anchored above or below.
 const Offset _actionPopupMenuAnchorOffset = Offset(0, 6);
-
-({double menuTop, double anchorLeft, double anchorWidth, bool opensTowardBottom})
-_chipPopupPlacement({
-  required BuildContext routeContext,
-  required RenderBox buttonBox,
-  required RenderBox overlayBox,
-  required double menuHeight,
-}) {
-  final mq = MediaQuery.of(routeContext);
-  final gap = _actionPopupMenuAnchorOffset.dy;
-
-  // Global delta avoids `localToGlobal(..., ancestor: overlay)` edge cases when the
-  // button isn’t under the same render subtree as [overlayBox].
-  final overlayOrigin = overlayBox.localToGlobal(Offset.zero);
-  final buttonTopLeft =
-      buttonBox.localToGlobal(Offset.zero) - overlayOrigin;
-  final buttonBottomRight = buttonBox.localToGlobal(
-        buttonBox.size.bottomRight(Offset.zero),
-      ) -
-      overlayOrigin;
-  final buttonRect = Rect.fromPoints(buttonTopLeft, buttonBottomRight);
-
-  final padding = mq.padding;
-  const kPad = _popupMenuScreenPadding;
-  final overlaySize = overlayBox.size;
-  final screenTop = padding.top + kPad;
-  final screenBottom = overlaySize.height - padding.bottom - kPad;
-
-  final fitsBelow = buttonRect.bottom + gap + menuHeight <= screenBottom;
-  final fitsAbove = buttonRect.top - gap - menuHeight >= screenTop;
-
-  late double menuTop;
-  late bool opensTowardBottom;
-
-  if (fitsBelow) {
-    menuTop = buttonRect.bottom + gap;
-    opensTowardBottom = true;
-  } else if (fitsAbove) {
-    menuTop = buttonRect.top - gap - menuHeight;
-    opensTowardBottom = false;
-  } else {
-    final spaceBelow = screenBottom - buttonRect.bottom - gap;
-    final spaceAbove = buttonRect.top - gap - screenTop;
-    if (spaceBelow >= spaceAbove) {
-      menuTop = buttonRect.bottom + gap;
-      opensTowardBottom = true;
-    } else {
-      menuTop = buttonRect.top - gap - menuHeight;
-      opensTowardBottom = false;
-    }
-  }
-
-  return (
-    menuTop: menuTop,
-    anchorLeft: buttonRect.left,
-    anchorWidth: buttonRect.width,
-    opensTowardBottom: opensTowardBottom,
-  );
-}
 
 enum _WalkMenuChoice {
   baseOnBalls,
@@ -1672,130 +1619,13 @@ class _OutlinedPopupMenuButton<T> extends StatefulWidget {
 }
 
 class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>> {
-  final GlobalKey _buttonKey = GlobalKey();
-
   bool _menuOpen = false;
-  bool _opensTowardBottom = true;
-
-  /// Extra height reserved when deciding above vs below so post-layout clamping
-  /// does not slide the menu back over the chip ([_PopupMenuRouteLayout] fit).
-  static const double _placementMenuHeightMargin = 10;
-
-  RelativeRect _menuPositionBuilder(
-    BuildContext routeContext,
-    BoxConstraints constraints, {
-    required double placementMenuHeight,
-  }) {
-    final button = _buttonKey.currentContext?.findRenderObject();
-    if (button is! RenderBox ||
-        !button.attached ||
-        !button.hasSize) {
-      return RelativeRect.fill;
-    }
-    final navigator = Navigator.of(routeContext);
-    final overlay = navigator.overlay?.context.findRenderObject();
-    if (overlay is! RenderBox ||
-        !overlay.attached ||
-        !overlay.hasSize) {
-      return RelativeRect.fill;
-    }
-    final p = _chipPopupPlacement(
-      routeContext: routeContext,
-      buttonBox: button,
-      overlayBox: overlay,
-      menuHeight: placementMenuHeight,
-    );
-    final anchorRect = Rect.fromLTWH(p.anchorLeft, p.menuTop, p.anchorWidth, 1);
-    final containerSize = Size(
-      constraints.hasBoundedWidth ? constraints.biggest.width : overlay.size.width,
-      constraints.hasBoundedHeight ? constraints.biggest.height : overlay.size.height,
-    );
-    return RelativeRect.fromRect(anchorRect, Offset.zero & containerSize);
-  }
-
-  Future<void> _openMenu() async {
-    final button = _buttonKey.currentContext?.findRenderObject();
-    if (button is! RenderBox ||
-        !button.attached ||
-        !button.hasSize) {
-      return;
-    }
-    final navigator = Navigator.of(context);
-    final overlay = navigator.overlay?.context.findRenderObject();
-    if (overlay is! RenderBox ||
-        !overlay.attached ||
-        !overlay.hasSize) {
-      return;
-    }
-
-    final items = widget.itemBuilder(context);
-    if (items.isEmpty) {
-      return;
-    }
-
-    final menuHeight = _estimatedPopupMenuHeightForEntries(context, items);
-    final placementMenuHeight = menuHeight + _placementMenuHeightMargin;
-
-    final placement = _chipPopupPlacement(
-      routeContext: context,
-      buttonBox: button,
-      overlayBox: overlay,
-      menuHeight: placementMenuHeight,
-    );
-
-    final chipWidth = button.size.width;
-    final menuConstraints = chipWidth.isFinite && chipWidth > 0
-        ? BoxConstraints.tightFor(width: chipWidth)
-        : null;
-
-    setState(() {
-      _menuOpen = true;
-      _opensTowardBottom = placement.opensTowardBottom;
-    });
-
-    final brightness = Theme.of(context).brightness;
-    try {
-      final selected = await showMenu<T>(
-        context: context,
-        positionBuilder: (routeContext, constraints) => _menuPositionBuilder(
-          routeContext,
-          constraints,
-          placementMenuHeight: placementMenuHeight,
-        ),
-        items: items,
-        elevation: SbPopupMenu.elevation,
-        shadowColor: brightness == Brightness.dark
-            ? SbPopupMenu.shadowDark
-            : SbPopupMenu.shadowLight,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(SbRadii.md),
-        side: SbLayout.actionChipBorderSide(widget.rim),
-        ),
-        color: SbColors.atBatPanelFill,
-        constraints: menuConstraints,
-        clipBehavior: Clip.none,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      if (selected != null) {
-        widget.onSelected?.call(selected);
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _menuOpen = false);
-      }
-    }
-  }
 
   IconData get _chevronIcon {
     if (!_menuOpen) {
       return LucideIcons.chevronRight;
     }
-    return _opensTowardBottom ? LucideIcons.chevronDown : LucideIcons.chevronUp;
+    return LucideIcons.chevronDown;
   }
 
   @override
@@ -1803,78 +1633,102 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
     final fill = SbColors.actionTranslucentFill(widget.rim);
     final iconColor = widget.foreground.withValues(alpha: 0.88);
     final radius = BorderRadius.circular(SbRadii.md);
+    final brightness = Theme.of(context).brightness;
     return Tooltip(
       message: widget.label,
-      child: Material(
-        key: _buttonKey,
-        color: Colors.transparent,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: _openMenu,
-          borderRadius: radius,
-          child: Ink(
-            decoration: BoxDecoration(
-              color: fill,
-              border: SbLayout.actionChipBorder(widget.rim),
-              borderRadius: radius,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final chipWidth = constraints.maxWidth;
+          final menuConstraints = chipWidth.isFinite && chipWidth > 0
+              ? BoxConstraints.tightFor(width: chipWidth)
+              : null;
+          return PopupMenuButton<T>(
+            tooltip: '',
+            elevation: SbPopupMenu.elevation,
+            shadowColor: brightness == Brightness.dark
+                ? SbPopupMenu.shadowDark
+                : SbPopupMenu.shadowLight,
+            surfaceTintColor: Colors.transparent,
+            color: SbColors.atBatPanelFill,
+            constraints: menuConstraints,
+            clipBehavior: Clip.none,
+            offset: _actionPopupMenuAnchorOffset,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(SbRadii.md),
+              side: SbLayout.actionChipBorderSide(widget.rim),
             ),
-            child: SizedBox(
-              height: SbLayout.actionButtonHeight,
-              width: double.infinity,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          widget.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: widget.foreground,
-                            height: 1.1,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 140),
-                        switchInCurve: Curves.easeOut,
-                        switchOutCurve: Curves.easeIn,
-                        transitionBuilder: (child, animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: ScaleTransition(
-                              scale: Tween<double>(begin: 0.92, end: 1).animate(
-                                animation,
+            onOpened: () => setState(() => _menuOpen = true),
+            onCanceled: () => setState(() => _menuOpen = false),
+            onSelected: (selected) {
+              setState(() => _menuOpen = false);
+              widget.onSelected?.call(selected);
+            },
+            itemBuilder: widget.itemBuilder,
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: radius,
+              clipBehavior: Clip.antiAlias,
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: fill,
+                  border: SbLayout.actionChipBorder(widget.rim),
+                  borderRadius: radius,
+                ),
+                child: SizedBox(
+                  height: SbLayout.actionButtonHeight,
+                  width: double.infinity,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              widget.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: widget.foreground,
+                                height: 1.1,
                               ),
-                              child: child,
                             ),
-                          );
-                        },
-                        child: Icon(
-                          _chevronIcon,
-                          key: ValueKey<Object>(
-                            (_menuOpen, _opensTowardBottom),
                           ),
-                          size: 18,
-                          color: iconColor,
-                        ),
+                          const SizedBox(width: 6),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 140),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: Tween<double>(begin: 0.92, end: 1)
+                                      .animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Icon(
+                              _chevronIcon,
+                              key: ValueKey<bool>(_menuOpen),
+                              size: 18,
+                              color: iconColor,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
