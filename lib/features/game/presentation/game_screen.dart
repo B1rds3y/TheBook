@@ -161,7 +161,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 valueListenable: popupRouteDepthNotifier,
                 builder: (context, popupDepth, _) {
                   final Widget scrollView = SingleChildScrollView(
-                    padding: EdgeInsets.only(top: topChromeHeight + 5),
+                    padding: EdgeInsets.only(top: topChromeHeight + UiCoreSpacing.xs),
                     child: Column(
                       children: [
                         _LineScoreHeader(state: gameState),
@@ -328,7 +328,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                             SbSpacing.atBatPanelMarginH,
                             SbSpacing.atBatPanelMarginBottom,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          padding: const EdgeInsets.symmetric(vertical: UiCoreSpacing.xs),
                           decoration: BoxDecoration(
                             color: SbColors.atBatPanelFill,
                             borderRadius: BorderRadius.circular(SbRadii.sm),
@@ -350,7 +350,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                                 onStrikePlus: () =>
                                     _withHaptic(notifier.incrementStrikes),
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: UiCoreSpacing.md),
                               _AtBatRow(
                                 isTop: gameState.isTop,
                                 atBat: activeBatter,
@@ -651,7 +651,7 @@ class _LineScoreHeader extends StatelessWidget {
               builder: (context, constraints) => Column(
               children: [
                 Text('INNING', style: _scoreLabelStyle),
-                const SizedBox(height: 5),
+                const SizedBox(height: UiCoreSpacing.xs),
                 Wrap(
                   spacing: SbSpacing.gutterSm,
                   crossAxisAlignment: WrapCrossAlignment.center,
@@ -673,15 +673,15 @@ class _LineScoreHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: UiCoreSpacing.xs),
                 Text('OUTS', style: _scoreLabelStyle),
-                const SizedBox(height: 5),
+                const SizedBox(height: UiCoreSpacing.xs),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List<Widget>.generate(
                     3,
                     (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5),
+                      margin: const EdgeInsets.symmetric(horizontal: UiCoreSpacing.xs),
                       width: SbLayout.countIndicatorDiameter,
                       height: SbLayout.countIndicatorDiameter,
                       decoration: BoxDecoration(
@@ -864,7 +864,10 @@ class _DiamondWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: UiCoreSpacing.xxsPlus,
+            vertical: UiCoreSpacing.xxxs,
+          ),
           child: player != null
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -978,7 +981,7 @@ class _RunnerActionPanel extends StatelessWidget {
                   onPressed: onScore,
                   child: const Text('Score run'),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: UiCoreSpacing.sm),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: SbColors.outlineButtonFg,
@@ -1065,7 +1068,7 @@ class _CountPitchStrip extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: UiCoreSpacing.xxxs),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: const Text(
@@ -1136,7 +1139,7 @@ class _CountPitchStrip extends StatelessWidget {
             ),
             SizedBox(height: dotToRowGap),
             SizedBox(
-              height: 48,
+              height: UiComponentTokens.scoreboardTileExtent,
               width: double.infinity,
               child: Stack(
                 alignment: Alignment.center,
@@ -1314,7 +1317,7 @@ class _StackedBatterName extends StatelessWidget {
                     color: color,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: UiCoreSpacing.sm),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 5,
@@ -1359,7 +1362,7 @@ class _StackedBatterName extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: UiCoreSpacing.xs),
             Text(
               primary,
               textAlign: TextAlign.left,
@@ -1430,13 +1433,13 @@ class _AtBatRow extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: UiCoreSpacing.xs),
               _StackedBatterName(
                 player: atBat,
                 compact: compact,
                 onDeck: false,
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: UiCoreSpacing.xs),
               Text(
                 statLineText,
                 textAlign: TextAlign.center,
@@ -1469,13 +1472,13 @@ class _AtBatRow extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: UiCoreSpacing.xs),
               _StackedBatterName(
                 player: onDeck,
                 compact: compact,
                 onDeck: true,
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: UiCoreSpacing.xs),
               Text(
                 statLineText,
                 textAlign: TextAlign.center,
@@ -1493,7 +1496,7 @@ class _AtBatRow extends StatelessWidget {
 
     if (!showContainer) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5),
+        padding: const EdgeInsets.symmetric(horizontal: UiCoreSpacing.xs),
         child: rowContent,
       );
     }
@@ -1553,7 +1556,7 @@ class _AtBatRow extends StatelessWidget {
 
 /// Divider between rows in Base Hit / Walked / Out chip popup menus.
 PopupMenuDivider _actionChipPopupMenuDivider() => PopupMenuDivider(
-      height: 10,
+      height: UiCoreSpacing.md,
       thickness: 1,
       indent: 12,
       endIndent: 12,
@@ -1889,7 +1892,9 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
                   width: double.infinity,
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: UiCoreSpacing.xsPlus,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
@@ -1908,7 +1913,7 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
                               ),
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: UiCoreSpacing.xsPlus),
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 140),
                             switchInCurve: Curves.easeOut,
@@ -1998,7 +2003,7 @@ class _ActionRow extends StatelessWidget {
             
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: UiCoreSpacing.xxsPlus),
           child: Center(
             child: Text(
               action.label,
@@ -2326,7 +2331,7 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                                   size: 22,
                                   color: SbColors.textPrimary,
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: UiCoreSpacing.sm),
                                 Text('Menu', style: _topBarChromeDigitStyle),
                               ],
                             ),
@@ -2356,7 +2361,7 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                             children: [
                               const _TopBarClock(),
                               if (sunsetTime != null)
-                                const SizedBox(height: 2),
+                                const SizedBox(height: UiCoreSpacing.xxxs),
                               if (sunsetTime != null)
                                 Text.rich(
                                   TextSpan(
@@ -2365,7 +2370,9 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                                         alignment:
                                             PlaceholderAlignment.middle,
                                         child: Padding(
-                                          padding: EdgeInsets.only(right: 3),
+                                          padding: EdgeInsets.only(
+                                            right: UiCoreSpacing.xxs,
+                                          ),
                                           child: Icon(
                                             LucideIcons.sunset,
                                             size: 12,
@@ -2443,7 +2450,7 @@ class _TopTimeAndMenuBar extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 20, color: iconColor),
-        const SizedBox(width: 12),
+        const SizedBox(width: UiCoreSpacing.lg),
         Expanded(
           child: Text(
             label,
@@ -2602,14 +2609,14 @@ class _TopActionBar extends StatelessWidget {
                     child: Row(
                       children: [
                         _iconSquare(icon: LucideIcons.sun, onTap: onTheme),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: UiCoreSpacing.sm),
                         _pill(
                           text: 'Undo',
                           icon: LucideIcons.undo2,
                           onTap: onUndo,
                           showText: !compact,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: UiCoreSpacing.sm),
                         _pill(
                           text: 'New',
                           icon: LucideIcons.power,
@@ -2626,7 +2633,7 @@ class _TopActionBar extends StatelessWidget {
                           bg: SbColors.pillStatsBg,
                           showText: !compact,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: UiCoreSpacing.sm),
                         _pill(
                           text: 'Roster',
                           icon: LucideIcons.users,
@@ -2690,7 +2697,7 @@ class _TopActionBar extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: fg),
             if (showText) ...[
-              const SizedBox(width: 7),
+              const SizedBox(width: UiCoreSpacing.smMinus),
               Text(
                 text,
                 style: TextStyle(color: fg, fontWeight: FontWeight.w700),

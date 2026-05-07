@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 abstract final class UiCoreSpacing {
   UiCoreSpacing._();
 
+  static const double xxxs = 2;
   static const double xxs = 3;
+  static const double xxsPlus = 4;
   static const double xs = 5;
+  static const double xsPlus = 6;
+  static const double smMinus = 7;
   static const double sm = 8;
   static const double md = 10;
   static const double lg = 12;

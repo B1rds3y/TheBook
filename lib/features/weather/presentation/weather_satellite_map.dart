@@ -131,8 +131,8 @@ class _WeatherSatelliteMapState extends State<WeatherSatelliteMap>
                   markers: [
                     Marker(
                       point: center,
-                      width: 36,
-                      height: 36,
+                      width: UiComponentTokens.topBarIconSize - UiCoreSpacing.xsPlus,
+                      height: UiComponentTokens.topBarIconSize - UiCoreSpacing.xsPlus,
                       alignment: Alignment.center,
                       rotate: true,
                       child: DecoratedBox(
