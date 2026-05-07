@@ -32,81 +32,98 @@ class _GameWeatherPanelState extends ConsumerState<GameWeatherPanel> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        SbSpacing.playByPlayHPad,
+        UiCoreSpacing.xxsPlus,
         0,
-        SbSpacing.playByPlayHPad,
-        SbSpacing.playByPlayVPadBottom,
+        UiCoreSpacing.xxsPlus,
+        UiCoreSpacing.xxsPlus,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Expanded(child: SizedBox()),
-              const Text(
-                'WEATHER',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: SbColors.labelMuted,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: SbColors.pbpPanelBorder),
+          borderRadius: BorderRadius.circular(SbRadii.sm),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              color: Colors.black.withValues(
+                alpha: SbLayout.mergedOverlayHeaderAlpha,
               ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: weather.loading
-                      ? const SizedBox(
-                          width: UiComponentTokens.topBarPillHeight - UiCoreSpacing.md,
-                          height: UiComponentTokens.topBarPillHeight - UiCoreSpacing.md,
-                        )
-                      : IconButton(
-                          tooltip: 'Refresh weather',
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          icon: const Icon(
-                            LucideIcons.refreshCw,
-                            size: 16,
-                            color: SbColors.labelMuted,
-                          ),
-                          onPressed: () => ref
-                              .read(weatherNotifierProvider.notifier)
-                              .refresh(),
-                        ),
-                ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: UiCoreSpacing.xxsPlus,
+                vertical: UiCoreSpacing.xs,
               ),
-            ],
-          ),
-          const SizedBox(height: SbSpacing.gutterSm),
-          Container(
-            padding: const EdgeInsets.all(SbSpacing.playByPlayHPad),
-            decoration: BoxDecoration(
-              color: SbColors.pbpPanelBg,
-              border: Border.all(color: SbColors.pbpPanelBorder),
-              borderRadius: BorderRadius.circular(SbRadii.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Expanded(child: SizedBox()),
+                  const Text(
+                    'WEATHER',
+                    textAlign: TextAlign.center,
+                    style: SbTypography.mergedSectionTitle,
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: weather.loading
+                          ? const SizedBox(
+                              width: UiComponentTokens.topBarPillHeight -
+                                  UiCoreSpacing.md,
+                              height: UiComponentTokens.topBarPillHeight -
+                                  UiCoreSpacing.md,
+                            )
+                          : IconButton(
+                              tooltip: 'Refresh weather',
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              icon: const Icon(
+                                LucideIcons.refreshCw,
+                                size: 16,
+                                color: SbColors.labelMuted,
+                              ),
+                              onPressed: () => ref
+                                  .read(weatherNotifierProvider.notifier)
+                                  .refresh(),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: weather.loading
-                ? const _WeatherLoadingBody()
-                : weather.data != null
-                    ? _WeatherLoadedBody(
-                        snapshot: weather.data!,
-                        expanded: _detailsExpanded,
-                        latitude: weather.latitude,
-                        longitude: weather.longitude,
-                        onToggleExpanded: () => setState(
-                          () => _detailsExpanded = !_detailsExpanded,
+            Container(
+              color: Colors.black.withValues(
+                alpha: SbLayout.mergedOverlayFillAlpha,
+              ),
+              padding: const EdgeInsets.fromLTRB(
+                UiCoreSpacing.xxsPlus,
+                0,
+                UiCoreSpacing.xxsPlus,
+                UiCoreSpacing.xxsPlus,
+              ),
+              child: weather.loading
+                  ? const _WeatherLoadingBody()
+                  : weather.data != null
+                      ? _WeatherLoadedBody(
+                          snapshot: weather.data!,
+                          expanded: _detailsExpanded,
+                          latitude: weather.latitude,
+                          longitude: weather.longitude,
+                          onToggleExpanded: () => setState(
+                            () => _detailsExpanded = !_detailsExpanded,
+                          ),
+                        )
+                      : _WeatherBannerBody(
+                          banner: weather.banner,
+                          detail: weather.bannerDetail,
                         ),
-                      )
-                    : _WeatherBannerBody(
-                        banner: weather.banner,
-                        detail: weather.bannerDetail,
-                      ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

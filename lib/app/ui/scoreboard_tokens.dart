@@ -17,25 +17,25 @@ abstract final class SbColors {
 
   static const Color linescoreLabel = Color(0xFFC2C7D4);
 
-  static const Color infieldFill = Color(0xFF21201F);
-  static const Color infieldBorder = Color(0xFF3E3C41);
+  static const Color infieldFill = Color(0xCC816B4B);
+  static const Color infieldBorder = Color(0xFFFFFFFF);
 
-  static const Color outfieldFill = Color(0xFF0C1514);
+  static const Color outfieldFill = Color(0xCC364E2A);
 
-  static const Color baseIdleFill = Color(0xFF2A2C37);
-  static const Color baseSelectedFill = Color(0xFF2D66D9);
-  static const Color baseIdleBorder = Color(0xFF4A4F5C);
-  static const Color baseSelectedBorder = Color(0xFF4A82F5);
+  static const Color baseIdleFill = Color(0xFFBFBFBF);
+  static const Color baseSelectedFill = Color(0xFFBFBFBF);
+  static const Color baseIdleBorder = Color(0xFF000000);
+  static const Color baseSelectedBorder = Color(0xFF000000);
 
-  static const Color basePlayerName = Color(0xFFF2F5FA);
-  static const Color baseSublabelSelected = Color(0xFFD6E4FF);
-  static const Color baseSublabelIdle = Color(0xFF9AA4B5);
-  static const Color baseLabelSelected = Color(0xFFF2F5FA);
-  static const Color baseLabelIdle = Color(0xFFB4BDCA);
+  static const Color basePlayerName = Color(0xFF000000);
+  static const Color baseSublabelSelected = Color(0xFF000000);
+  static const Color baseSublabelIdle = Color(0xFF000000);
+  static const Color baseLabelSelected = Color(0xFF000000);
+  static const Color baseLabelIdle = Color(0xFF000000);
 
-  static const Color homePlateFill = Color(0xFF2A2C37);
-  static const Color homePlateBorder = Color(0xFF4A4F5C);
-  static const Color homePlateText = Color(0xFFE6EAF2);
+  static const Color homePlateFill = Color(0xFFBFBFBF);
+  static const Color homePlateBorder = Color(0xFF000000);
+  static const Color homePlateText = Color(0xFF000000);
 
   static const Color runnerPanelFill = Color(0xFF161821);
   static const Color runnerPanelBorder = Color(0xFF2E3240);
@@ -105,9 +105,22 @@ abstract final class SbColors {
   static const Color pillStatsBg = Color(0xFF008B65);
   static const Color pillRosterBg = Color(0xFF1A55D1);
 
-  static const Color pbpPanelBg = Color(0xFF0C1019);
   static const Color pbpPanelBorder = Color(0xFF252A37);
   static const Color pbpBody = Color(0xFFB7BCC8);
+}
+
+/// Caps headers matching GAME / BATTER overlays ([GameScreen] merged card, PBP, weather).
+abstract final class SbTypography {
+  SbTypography._();
+
+  static const TextStyle mergedSectionTitle = TextStyle(
+    color: SbColors.linescoreLabel,
+    letterSpacing: 1.4,
+    fontWeight: FontWeight.w800,
+    fontSize: UiCoreTypography.titleXl,
+    height: 1.0,
+    leadingDistribution: TextLeadingDistribution.even,
+  );
 }
 
 abstract final class SbRadii {
@@ -126,7 +139,6 @@ abstract final class SbSpacing {
   static const double gutterMd = UiCoreSpacing.md;
   static const double gutterLg = UiCoreSpacing.lg;
   static const double gutterXl = UiCoreSpacing.xl;
-  static const double gutterSection = UiCoreSpacing.section;
 
   static const double stripOuterH = 10;
   static const double stripInner = 10;
@@ -146,9 +158,6 @@ abstract final class SbSpacing {
   static const double linescoreVPadBottom = 8;
   static const double metricBelowLabel = 5;
 
-  static const double runnerPanelEdge = 16;
-  static const double runnerPanelVPad = 8;
-
   static const double playByPlayHPad = 14;
   static const double playByPlayVPadBottom = 14;
 
@@ -165,7 +174,7 @@ abstract final class SbSpacing {
 
   /// Tucks chrome slightly under the system-reported top inset on **iPhone** only.
   /// Safe Area itself cannot be negative; we reduce our *used* inset by this amount.
-  static const double iphoneTopInsetTrim = 40;
+  static const double iphoneTopInsetTrim = 25;
 
   static const double pillPadHCompact = 12;
   static const double pillPadHComfortable = 14;
@@ -208,6 +217,12 @@ abstract final class SbLayout {
   static const double actionChipBorderWidth = UiCoreEffects.actionChipBorderWidth;
   static const double actionChipFillOpacity = UiCoreEffects.actionChipFillOpacity;
 
+  /// Black overlay opacity for GAME/score pill, batter strip, and PBP/weather bodies.
+  static const double mergedOverlayFillAlpha = 0.70;
+
+  /// Caps strip on those overlays (GAME / BATTER / PBP / WEATHER headers).
+  static const double mergedOverlayHeaderAlpha = 0.85;
+
   /// Outline for pitch row, hit/walk/out chips, Error / FC — center-aligned stroke
   /// so width reads the same as [showMenu] rims (which use center stroke).
   static BorderSide actionChipBorderSide(Color rim) => BorderSide(
@@ -225,18 +240,9 @@ abstract final class SbLayout {
   /// Linescore outs dots + pitch-strip balls/strikes indicator dots (logical px).
   static const double countIndicatorDiameter = UiComponentTokens.countIndicatorDiameter;
 
-  /// Frosted left/right/bottom edge wrap thickness on the game screen.
-  static const double chromeEdgeWrapThickness = 8;
-
   /// Outer rounding along physical bottom-left / bottom-right display corners
   /// (approximates typical full-screen iPhones; tuned visually vs Flutter clamps).
   static const double chromeEdgeScreenCornerRadius = 54;
-
-  /// Extra radius so frost reaches snugly into the rounded bezel (logical px).
-  static const double chromeEdgeCornerOverlap = 2.5;
-
-  /// [figma_squircle] smoothing for hardware-like continuous corners (iOS-style).
-  static const double chromeEdgeSquircleSmoothing = 0.6;
 
   static const double actionButtonHeight = scoreboardTileExtent;
   static const double actionButtonHeightTwoLine = scoreboardTileExtent + 12;

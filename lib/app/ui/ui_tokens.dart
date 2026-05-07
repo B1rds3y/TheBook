@@ -79,7 +79,7 @@ abstract final class UiCoreStroke {
 abstract final class UiSemanticColors {
   UiSemanticColors._();
 
-  static const Color canvas = Color(0xFF0B0D13);
+  static const Color canvas = Color(0xFF000000);
   static const Color divider = Color(0xFF222633);
   static const Color textPrimary = Color(0xFFF1F4FA);
   static const Color textMuted = Color(0xFFC8CDD8);
@@ -94,30 +94,51 @@ abstract final class UiComponentTokens {
   UiComponentTokens._();
 
   static const double scoreboardTileExtent = 48;
-  static const double countIndicatorDiameter = 14;
+  static const double countIndicatorDiameter = 16;
   static const double topBarIconSize = 42;
   static const double topBarPillHeight = 42;
   static const double weatherKeyValueLabelWidth = 132;
   static const double weatherSatelliteHeight = 188;
 }
 
-class UiScreenBorderTokens {
-  const UiScreenBorderTokens({
-    required this.alpha,
+class UiDockedButtonStyle {
+  const UiDockedButtonStyle({
+    required this.fillAlpha,
     required this.sigma,
-    required this.sideInset,
-    required this.bottomInset,
+    required this.borderWidth,
   });
 
-  final double alpha;
+  final double fillAlpha;
   final double sigma;
-  final double sideInset;
-  final double bottomInset;
+  final double borderWidth;
 }
 
-const kScreenBorderTokens = UiScreenBorderTokens(
-  alpha: 0,
-  sigma: 22,
-  sideInset: 10,
-  bottomInset: 10,
+class UiFillableCircleTokens {
+  const UiFillableCircleTokens({
+    required this.dimension,
+    required this.nonFilledColor,
+    required this.borderColor,
+    required this.borderWidth,
+  });
+
+  final double dimension;
+  final Color nonFilledColor;
+  final Color borderColor;
+  final double borderWidth;
+}
+
+const kFillableCircle = UiFillableCircleTokens(
+  dimension: UiComponentTokens.countIndicatorDiameter,
+  nonFilledColor: Colors.black,
+  borderColor: Color(0xFF5C6575),
+  borderWidth: UiCoreStroke.medium,
 );
+
+const kDockedButtonStyle = UiDockedButtonStyle(
+  fillAlpha: 0.85,
+  sigma: 15,
+  borderWidth: UiCoreStroke.hairline,
+);
+
+/// Tint opacity for frosted top/bottom dock chrome ([BackdropFilter] overlay).
+const double kDockedChromeFillOpacity = 0.10;

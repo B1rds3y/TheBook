@@ -12,7 +12,6 @@ import 'package:digital_scorebook_pro/features/game/domain/game_state.dart';
 import 'package:digital_scorebook_pro/features/game/domain/player.dart';
 import 'package:digital_scorebook_pro/features/weather/application/weather_notifier.dart';
 import 'package:digital_scorebook_pro/features/weather/presentation/game_weather_panel.dart';
-import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -41,12 +40,17 @@ double _topSafeInsetUsed(BuildContext context) {
 
 /// Fill used by the embedded menu trigger and time pill (match kept in one place).
 /// Menu keeps the original outlined chrome look via [outlineBorder].
+double _dockedContainerFillOpacity(BuildContext _) => kDockedChromeFillOpacity;
+
 BoxDecoration _topBarMutedCanvasDecoration({bool outlineBorder = false}) =>
     BoxDecoration(
-      color: SbColors.canvas.withValues(alpha: 0.25),
+      color: SbColors.canvas.withValues(alpha: kDockedButtonStyle.fillAlpha),
       borderRadius: BorderRadius.circular(SbRadii.sm),
       border: outlineBorder
-          ? Border.all(color: SbColors.textPrimary, width: UiCoreStroke.hairline)
+          ? Border.all(
+              color: SbColors.textPrimary,
+              width: kDockedButtonStyle.borderWidth,
+            )
           : null,
     );
 
@@ -147,12 +151,11 @@ class _GameScreenState extends ConsumerState<GameScreen>
             ? embeddedChromeBodyHeight
             : desktopChromeBodyHeight);
 
-    final chromeSideT = kScreenBorderTokens.sideInset;
-    final chromeBottomT = kScreenBorderTokens.bottomInset;
+    const bottomActionDockHeight = 206.0;
 
     return Scaffold(
       body: Container(
-        color: SbColors.canvas,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -161,10 +164,137 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 valueListenable: popupRouteDepthNotifier,
                 builder: (context, popupDepth, _) {
                   final Widget scrollView = SingleChildScrollView(
-                    padding: EdgeInsets.only(top: topChromeHeight + UiCoreSpacing.xs),
+                    padding: EdgeInsets.only(
+                      top: topChromeHeight + UiCoreSpacing.xs,
+                      bottom: bottomActionDockHeight + UiCoreSpacing.section,
+                    ),
                     child: Column(
                       children: [
-                        _LineScoreHeader(state: gameState),
+                        _ScoreboardFieldPanel(
+                          state: gameState,
+                          selectedBase: _selectedBase,
+                          playLogs: gameState.playLogs,
+                          batterPanel: Container(
+                            margin: const EdgeInsets.only(
+                              top: SbSpacing.linescoreVPadBottom,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(SbRadii.sm),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Container(
+                                  color: Colors.black.withValues(
+                                    alpha: SbLayout.mergedOverlayHeaderAlpha,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: UiCoreSpacing.xs,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        gameState.isTop ? 'AWAY' : 'HOME',
+                                        style: SbTypography.mergedSectionTitle.copyWith(
+                                          color: SbColors.teamTagAccent,
+                                        ),
+                                      ),
+                                      SizedBox(width: UiCoreSpacing.sm),
+                                      Text(
+                                        'BATTER',
+                                        style: SbTypography.mergedSectionTitle,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  color: Colors.black.withValues(
+                                    alpha: SbLayout.mergedOverlayFillAlpha,
+                                  ),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    0,
+                                    0,
+                                    0,
+                                    UiCoreSpacing.xxsPlus,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _CountPitchStrip(
+                                        state: gameState,
+                                        onBallMinus: () =>
+                                            _withHaptic(notifier.decrementBalls),
+                                        onBallPlus: () =>
+                                            _withHaptic(notifier.incrementBalls),
+                                        onStrikeMinus: () => _withHaptic(
+                                          notifier.decrementStrikes,
+                                        ),
+                                        onStrikePlus: () => _withHaptic(
+                                          notifier.incrementStrikes,
+                                        ),
+                                      ),
+                                      const SizedBox(height: UiCoreSpacing.md),
+                                      _AtBatRow(
+                                        atBat: activeBatter,
+                                        statLineText: 'Stats coming soon',
+                                        onDeck: onDeckBatter,
+                                        onPrevious: () =>
+                                            _withHaptic(notifier.previousBatter),
+                                        onNext: () =>
+                                            _withHaptic(notifier.nextBatter),
+                                        showContainer: false,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onBaseTapped: (baseIndex) {
+                            HapticFeedback.lightImpact();
+                            if (_isSelectingDoublePlay) {
+                              if (gameState.bases[baseIndex] == null) {
+                                return;
+                              }
+                              _handleDoublePlaySelection(
+                                notifier: notifier,
+                                tappedBaseIndex: baseIndex,
+                                batterTapped: false,
+                              );
+                              return;
+                            }
+                            if (_isSelectingFieldersChoice) {
+                              if (gameState.bases[baseIndex] == null) {
+                                return;
+                              }
+                              notifier.resolveFieldersChoiceAtBase(baseIndex);
+                              setState(() {
+                                _isSelectingFieldersChoice = false;
+                                _selectedBase = null;
+                              });
+                              return;
+                            }
+                            setState(() {
+                              _selectedBase = _selectedBase == baseIndex
+                                  ? null
+                                  : baseIndex;
+                            });
+                          },
+                          onHomeTapped: () {
+                            HapticFeedback.lightImpact();
+                            if (!_isSelectingDoublePlay) {
+                              return;
+                            }
+                            _handleDoublePlaySelection(
+                              notifier: notifier,
+                              tappedBaseIndex: null,
+                              batterTapped: true,
+                            );
+                          },
+                        ),
                         if (_isSelectingFieldersChoice)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
@@ -227,59 +357,15 @@ class _GameScreenState extends ConsumerState<GameScreen>
                               ),
                             ),
                           ),
-                        _DiamondWidget(
-                          state: gameState,
-                          selectedBase: _selectedBase,
-                          onBaseTapped: (baseIndex) {
-                            HapticFeedback.lightImpact();
-                            if (_isSelectingDoublePlay) {
-                              if (gameState.bases[baseIndex] == null) {
-                                return;
-                              }
-                              _handleDoublePlaySelection(
-                                notifier: notifier,
-                                tappedBaseIndex: baseIndex,
-                                batterTapped: false,
-                              );
-                              return;
-                            }
-                            if (_isSelectingFieldersChoice) {
-                              if (gameState.bases[baseIndex] == null) {
-                                return;
-                              }
-                              notifier.resolveFieldersChoiceAtBase(baseIndex);
-                              setState(() {
-                                _isSelectingFieldersChoice = false;
-                                _selectedBase = null;
-                              });
-                              return;
-                            }
-                            setState(() {
-                              _selectedBase = _selectedBase == baseIndex
-                                  ? null
-                                  : baseIndex;
-                            });
-                          },
-                          onHomeTapped: () {
-                            HapticFeedback.lightImpact();
-                            if (!_isSelectingDoublePlay) {
-                              return;
-                            }
-                            _handleDoublePlaySelection(
-                              notifier: notifier,
-                              tappedBaseIndex: null,
-                              batterTapped: true,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: SbSpacing.linescoreVPadBottom),
                         if (_selectedBase != null &&
                             !_isSelectingFieldersChoice &&
                             !_isSelectingDoublePlay)
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: SbSpacing.runnerPanelEdge,
-                              vertical: SbSpacing.runnerPanelVPad,
+                            padding: const EdgeInsets.fromLTRB(
+                              UiCoreSpacing.xxsPlus,
+                              UiCoreSpacing.xxsPlus,
+                              UiCoreSpacing.xxsPlus,
+                              0,
                             ),
                             child: _RunnerActionPanel(
                               baseIndex: _selectedBase!,
@@ -321,142 +407,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
                               },
                             ),
                           ),
-                        Container(
-                          margin: const EdgeInsets.fromLTRB(
-                            SbSpacing.atBatPanelMarginH,
-                            0,
-                            SbSpacing.atBatPanelMarginH,
-                            SbSpacing.atBatPanelMarginBottom,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: UiCoreSpacing.xs),
-                          decoration: BoxDecoration(
-                            color: SbColors.atBatPanelFill,
-                            borderRadius: BorderRadius.circular(SbRadii.sm),
-                            border: Border.all(
-                              color: SbColors.pillBorder,
-                              width: UiCoreStroke.thin,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              _CountPitchStrip(
-                                state: gameState,
-                                onBallMinus: () =>
-                                    _withHaptic(notifier.decrementBalls),
-                                onBallPlus: () =>
-                                    _withHaptic(notifier.incrementBalls),
-                                onStrikeMinus: () =>
-                                    _withHaptic(notifier.decrementStrikes),
-                                onStrikePlus: () =>
-                                    _withHaptic(notifier.incrementStrikes),
-                              ),
-                              const SizedBox(height: UiCoreSpacing.md),
-                              _AtBatRow(
-                                isTop: gameState.isTop,
-                                atBat: activeBatter,
-                                statLineText: 'Stats coming soon',
-                                onDeck: onDeckBatter,
-                                onPrevious: () =>
-                                    _withHaptic(notifier.previousBatter),
-                                onNext: () => _withHaptic(notifier.nextBatter),
-                                showContainer: false,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: SbSpacing.actionButtonGap,
-                                ),
-                                child: Column(
-                                  children: [
-                                    _ActionRow(
-                                      actions: [
-                                        _ActionSpec(
-                                          label: 'Ball',
-                                          onTap: () => notifier.logPitch('Ball'),
-                                          accent: SbColors.textPrimary,
-                                          labelColor: SbColors.textPrimary,
-                                        ),
-                                        _ActionSpec(
-                                          label: 'Strike',
-                                          onTap: () => notifier.logPitch('Strike'),
-                                          accent: SbColors.textPrimary,
-                                          labelColor: SbColors.textPrimary,
-                                        ),
-                                        _ActionSpec(
-                                          label: 'Foul',
-                                          onTap: () => notifier.logPitch('Foul'),
-                                          accent: SbColors.textPrimary,
-                                          labelColor: SbColors.textPrimary,
-                                        ),
-                                      ],
-                                      onAction: _withHaptic,
-                                    ),
-                                    const SizedBox(
-                                      height: SbSpacing.actionButtonGap,
-                                    ),
-                                    _BaseHitWalkedOutMenusRow(
-                                      onAction: _withHaptic,
-                                      onHit: notifier.logHit,
-                                      onWalkBalls: () => notifier.logOutcome(
-                                        'Walk',
-                                      ),
-                                      onHitByPitch: () =>
-                                          notifier.logOutcome('HBP'),
-                                      isDoublePlayEnabled: canSelectDoublePlay,
-                                      onOutChoice: (choice) {
-                                        switch (choice) {
-                                          case _OutMenuChoice.fieldOut:
-                                            notifier.logOutcome('Out');
-                                          case _OutMenuChoice.doublePlay:
-                                            setState(() {
-                                              _isSelectingFieldersChoice = false;
-                                              _isSelectingDoublePlay = true;
-                                              _dpOutsSelected = 0;
-                                              _dpFirstOutWasBatter = false;
-                                              _selectedBase = null;
-                                            });
-                                          case _OutMenuChoice.sacrifice:
-                                            notifier.logOutcome('SAC');
-                                        }
-                                      },
-                                    ),
-                                    const SizedBox(
-                                      height: SbSpacing.actionButtonGap,
-                                    ),
-                                    _ActionRow(
-                                      actions: [
-                                        _ActionSpec(
-                                          label: 'Error (E)',
-                                          onTap: () => notifier.logOutcome('E'),
-                                          accent: SbColors.errorBorder,
-                                          labelColor: SbColors.errorLabel,
-                                        ),
-                                        _ActionSpec(
-                                          label: "Fielder's Choice",
-                                          onTap: () {
-                                            setState(() {
-                                              _isSelectingDoublePlay = false;
-                                              _dpOutsSelected = 0;
-                                              _dpFirstOutWasBatter = false;
-                                              _isSelectingFieldersChoice = true;
-                                              _selectedBase = null;
-                                            });
-                                          },
-                                          accent: SbColors.textPrimary,
-                                          labelColor: SbColors.textPrimary,
-                                          enabled: hasRunnerOnBase,
-                                        ),
-                                      ],
-                                      onAction: _withHaptic,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: SbSpacing.gutterSection),
-                        _PlayByPlayPanel(logs: gameState.playLogs),
-                        const SizedBox(height: SbSpacing.gutterSection),
+                        const SizedBox(height: UiCoreSpacing.xxsPlus),
                         const GameWeatherPanel(),
                       ],
                     ),
@@ -502,28 +453,47 @@ class _GameScreenState extends ConsumerState<GameScreen>
                 },
               ),
             ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: ClipPath(
-                  clipBehavior: Clip.antiAlias,
-                  clipper: _LRBottomChromeClipper(
-                    topY: topChromeHeight,
-                    sideThickness: chromeSideT,
-                    bottomThickness: chromeBottomT,
-                    junctionRadius: SbRadii.sm,
-                    screenCornerRadius: SbLayout.chromeEdgeScreenCornerRadius,
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _TopBarFrostedFill(
-                        blurSigma: kScreenBorderTokens.sigma,
-                        fillOpacity: kScreenBorderTokens.alpha,
-                        child: const SizedBox.expand(),
-                      ),
-                    ],
-                  ),
-                ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _BottomDockedActionPanel(
+                height: bottomActionDockHeight,
+                hasRunnerOnBase: hasRunnerOnBase,
+                canSelectDoublePlay: canSelectDoublePlay,
+                onAction: _withHaptic,
+                onBall: () => notifier.logPitch('Ball'),
+                onStrike: () => notifier.logPitch('Strike'),
+                onFoul: () => notifier.logPitch('Foul'),
+                onHit: notifier.logHit,
+                onWalkBalls: () => notifier.logOutcome('Walk'),
+                onHitByPitch: () => notifier.logOutcome('HBP'),
+                onOutChoice: (choice) {
+                  switch (choice) {
+                    case _OutMenuChoice.fieldOut:
+                      notifier.logOutcome('Out');
+                    case _OutMenuChoice.doublePlay:
+                      setState(() {
+                        _isSelectingFieldersChoice = false;
+                        _isSelectingDoublePlay = true;
+                        _dpOutsSelected = 0;
+                        _dpFirstOutWasBatter = false;
+                        _selectedBase = null;
+                      });
+                    case _OutMenuChoice.sacrifice:
+                      notifier.logOutcome('SAC');
+                  }
+                },
+                onError: () => notifier.logOutcome('E'),
+                onFieldersChoice: () {
+                  setState(() {
+                    _isSelectingDoublePlay = false;
+                    _dpOutsSelected = 0;
+                    _dpFirstOutWasBatter = false;
+                    _isSelectingFieldersChoice = true;
+                    _selectedBase = null;
+                  });
+                },
               ),
             ),
             Positioned(
@@ -608,7 +578,7 @@ class _GameScreenState extends ConsumerState<GameScreen>
 }
 
 class _LineScoreHeader extends StatelessWidget {
-  const _LineScoreHeader({required this.state});
+  const _LineScoreHeader({required this.state, this.embeddedInMergedPanel = false});
 
   /// Matches team labels (AWAY / HOME); explicit size omitted so theme default applies.
   static const TextStyle _scoreLabelStyle = TextStyle(
@@ -619,9 +589,127 @@ class _LineScoreHeader extends StatelessWidget {
   );
 
   final GameState state;
+  final bool embeddedInMergedPanel;
 
   @override
   Widget build(BuildContext context) {
+    final pill = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(SbRadii.sm),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            color: Colors.black.withValues(
+              alpha: SbLayout.mergedOverlayHeaderAlpha,
+            ),
+            padding: const EdgeInsets.only(
+              left: SbSpacing.stripInner,
+              right: SbSpacing.stripInner,
+              top: UiCoreSpacing.xs,
+              bottom: UiCoreSpacing.xs,
+            ),
+            child: Row(
+              children: [
+                const Expanded(child: SizedBox()),
+                Expanded(
+                  child: Text(
+                    'GAME',
+                    textAlign: TextAlign.center,
+                    style: SbTypography.mergedSectionTitle,
+                  ),
+                ),
+                const Expanded(child: SizedBox()),
+              ],
+            ),
+          ),
+          Container(
+            color: Colors.black.withValues(
+              alpha: SbLayout.mergedOverlayFillAlpha,
+            ),
+            padding: const EdgeInsets.only(
+              left: SbSpacing.stripInner,
+              right: SbSpacing.stripInner,
+              top: 0,
+              bottom: SbSpacing.stripInner,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _scoreBlock(label: 'AWAY', runs: state.awayRuns),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text('INNING', style: _scoreLabelStyle),
+                      const SizedBox(height: UiCoreSpacing.xs),
+                      Wrap(
+                        spacing: SbSpacing.gutterSm,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          Text(
+                            state.isTop ? 'TOP' : 'BOTTOM',
+                            style: const TextStyle(
+                              color: SbColors.inningAccent,
+                              fontWeight: FontWeight.w700,
+                              fontSize: UiCoreTypography.titleLg,
+                            ),
+                          ),
+                          Text(
+                            '${state.inning}',
+                            style: const TextStyle(
+                              fontSize: UiCoreTypography.displaySm,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: UiCoreSpacing.xs),
+                      Text('OUTS', style: _scoreLabelStyle),
+                      const SizedBox(height: UiCoreSpacing.xs),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List<Widget>.generate(
+                          3,
+                          (index) => Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: UiCoreSpacing.xs,
+                            ),
+                            width: kFillableCircle.dimension,
+                            height: kFillableCircle.dimension,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: kFillableCircle.borderColor,
+                                width: kFillableCircle.borderWidth,
+                              ),
+                              color: index < state.outs
+                                  ? SbColors.outsFilled
+                                  : kFillableCircle.nonFilledColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: _scoreBlock(label: 'HOME', runs: state.homeRuns),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (embeddedInMergedPanel) {
+      return pill;
+    }
     return Container(
       margin: const EdgeInsets.fromLTRB(
         SbSpacing.atBatPanelMarginH,
@@ -629,80 +717,11 @@ class _LineScoreHeader extends StatelessWidget {
         SbSpacing.atBatPanelMarginH,
         SbSpacing.linescoreVPadBottom,
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: SbSpacing.stripInner,
-        vertical: SbSpacing.stripInner,
-      ),
       decoration: BoxDecoration(
         color: SbColors.atBatPanelFill,
         borderRadius: BorderRadius.circular(SbRadii.sm),
-        border: Border.all(
-          color: SbColors.pillBorder,
-          width: UiCoreStroke.thin,
-        ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _scoreBlock(label: 'AWAY', runs: state.awayRuns),
-          ),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) => Column(
-              children: [
-                Text('INNING', style: _scoreLabelStyle),
-                const SizedBox(height: UiCoreSpacing.xs),
-                Wrap(
-                  spacing: SbSpacing.gutterSm,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      state.isTop ? 'TOP' : 'BOTTOM',
-                      style: const TextStyle(
-                        color: SbColors.inningAccent,
-                        fontWeight: FontWeight.w700,
-                        fontSize: UiCoreTypography.titleLg,
-                      ),
-                    ),
-                    Text(
-                      '${state.inning}',
-                      style: const TextStyle(
-                        fontSize: UiCoreTypography.displaySm,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: UiCoreSpacing.xs),
-                Text('OUTS', style: _scoreLabelStyle),
-                const SizedBox(height: UiCoreSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List<Widget>.generate(
-                    3,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: UiCoreSpacing.xs),
-                      width: SbLayout.countIndicatorDiameter,
-                      height: SbLayout.countIndicatorDiameter,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: SbColors.outsRingBorder),
-                        color: index < state.outs
-                            ? SbColors.outsFilled
-                            : Colors.transparent,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            ),
-          ),
-          Expanded(
-            child: _scoreBlock(label: 'HOME', runs: state.homeRuns),
-          ),
-        ],
-      ),
+      child: pill,
     );
   }
 
@@ -729,6 +748,7 @@ class _DiamondWidget extends StatelessWidget {
     required this.selectedBase,
     required this.onBaseTapped,
     required this.onHomeTapped,
+    this.embeddedInMergedPanel = false,
   });
 
   /// Cumulative ~14.5% smaller than original layout (0.9 × 0.95).
@@ -759,6 +779,7 @@ class _DiamondWidget extends StatelessWidget {
   final int? selectedBase;
   final ValueChanged<int> onBaseTapped;
   final VoidCallback onHomeTapped;
+  final bool embeddedInMergedPanel;
 
   @override
   Widget build(BuildContext context) {
@@ -773,24 +794,7 @@ class _DiamondWidget extends StatelessWidget {
     final vertexFractionX = _vertexRadius / stackHalfX;
     final vertexFractionY = _vertexRadius / stackHalfY;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SbSpacing.atBatPanelMarginH,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(SbRadii.sm),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: SbColors.outfieldFill,
-            borderRadius: BorderRadius.circular(SbRadii.sm),
-            border: Border.all(
-              color: SbColors.pillBorder,
-              width: UiCoreStroke.thin,
-            ),
-            
-          ),
-          child: Column(
+    final diamondContent = Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
@@ -830,7 +834,27 @@ class _DiamondWidget extends StatelessWidget {
               ),
               const SizedBox.shrink(),
             ],
+          );
+    if (embeddedInMergedPanel) {
+      return diamondContent;
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SbSpacing.atBatPanelMarginH,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(SbRadii.sm),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: SbColors.outfieldFill,
+            borderRadius: BorderRadius.circular(SbRadii.sm),
+            border: Border.all(
+              color: SbColors.pillBorder,
+              width: UiCoreStroke.thin,
+            ),
           ),
+          child: diamondContent,
         ),
       ),
     );
@@ -890,7 +914,7 @@ class _DiamondWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: _baseLabelSmallFontSize,
                         fontWeight: FontWeight.w600,
-                        color: SbColors.textPrimary,
+                        color: SbColors.baseLabelIdle,
                       ),
                     ),
                   ],
@@ -901,7 +925,7 @@ class _DiamondWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: _baseLabelLargeFontSize,
                     fontWeight: FontWeight.w600,
-                    color: SbColors.textPrimary,
+                    color: SbColors.baseLabelIdle,
                   ),
                 ),
         ),
@@ -926,11 +950,66 @@ class _DiamondWidget extends StatelessWidget {
           child: const Text(
             'Home',
             style: TextStyle(
-              color: SbColors.baseLabelIdle,
+              color: SbColors.homePlateText,
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ScoreboardFieldPanel extends StatelessWidget {
+  const _ScoreboardFieldPanel({
+    required this.state,
+    required this.selectedBase,
+    required this.playLogs,
+    required this.batterPanel,
+    required this.onBaseTapped,
+    required this.onHomeTapped,
+  });
+
+  final GameState state;
+  final int? selectedBase;
+  final List<String> playLogs;
+  final Widget batterPanel;
+  final ValueChanged<int> onBaseTapped;
+  final VoidCallback onHomeTapped;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        UiCoreSpacing.xxsPlus,
+        UiCoreSpacing.xxsPlus,
+        UiCoreSpacing.xxsPlus,
+        0,
+      ),
+      padding: const EdgeInsets.all(UiCoreSpacing.xxsPlus),
+      decoration: BoxDecoration(
+        color: SbColors.outfieldFill,
+        borderRadius: BorderRadius.circular(SbRadii.sm),
+        border: Border.all(
+          color: SbColors.pillBorder,
+          width: UiCoreStroke.thin,
+        ),
+      ),
+      child: Column(
+        children: [
+          _LineScoreHeader(state: state, embeddedInMergedPanel: true),
+          const SizedBox(height: SbSpacing.linescoreVPadBottom),
+          _DiamondWidget(
+            state: state,
+            selectedBase: selectedBase,
+            onBaseTapped: onBaseTapped,
+            onHomeTapped: onHomeTapped,
+            embeddedInMergedPanel: true,
+          ),
+          batterPanel,
+          const SizedBox(height: UiCoreSpacing.xxsPlus),
+          _PlayByPlayPanel(logs: playLogs),
+        ],
       ),
     );
   }
@@ -956,7 +1035,7 @@ class _RunnerActionPanel extends StatelessWidget {
         border: Border.all(color: SbColors.runnerPanelBorder),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(SbSpacing.gutterLg),
+        padding: const EdgeInsets.all(UiCoreSpacing.xxsPlus),
         child: Wrap(
           runSpacing: 8,
           spacing: 8,
@@ -1014,7 +1093,7 @@ class _CountPitchStrip extends StatelessWidget {
   final VoidCallback onStrikeMinus;
   final VoidCallback onStrikePlus;
 
-  static const double _dotRowHeight = SbLayout.countIndicatorDiameter;
+  static double get _dotRowHeight => kFillableCircle.dimension;
   static const double _numberFontSize = 40;
 
   @override
@@ -1190,7 +1269,6 @@ class _CountPitchStrip extends StatelessWidget {
     required Color activeColor,
     double dotSpacing = 8,
   }) {
-    const emptyBorder = SbColors.countDotEmptyBorder;
     return SizedBox(
       height: _dotRowHeight,
       child: Row(
@@ -1201,14 +1279,14 @@ class _CountPitchStrip extends StatelessWidget {
           return Padding(
             padding: EdgeInsets.only(left: i > 0 ? dotSpacing : 0),
             child: Container(
-              width: SbLayout.countIndicatorDiameter,
-              height: SbLayout.countIndicatorDiameter,
+              width: kFillableCircle.dimension,
+              height: kFillableCircle.dimension,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: on ? activeColor : Colors.transparent,
+                color: on ? activeColor : kFillableCircle.nonFilledColor,
                 border: Border.all(
-                  color: on ? activeColor : emptyBorder,
-                  width: UiCoreStroke.medium,
+                  color: kFillableCircle.borderColor,
+                  width: kFillableCircle.borderWidth,
                 ),
               ),
             ),
@@ -1265,9 +1343,9 @@ class _StackedBatterName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lastFontSize =
-        onDeck ? (compact ? 16.0 : 26.0) : (compact ? 22.0 : 32.0);
+        onDeck ? (compact ? 12.0 : 22.0) : (compact ? 18.0 : 28.0);
     final firstFontSize =
-        onDeck ? (compact ? 8.0 : 13.0) : (compact ? 11.0 : 16.0);
+        onDeck ? (compact ? 4.0 : 9.0) : (compact ? 7.0 : 12.0);
     final jerseyFontSize =
         onDeck ? (compact ? 4.0 : 9.0) : (compact ? 7.0 : 12.0);
     final color = onDeck ? SbColors.onDeckPlayerName : SbColors.textPrimary;
@@ -1384,7 +1462,6 @@ class _StackedBatterName extends StatelessWidget {
 
 class _AtBatRow extends StatelessWidget {
   const _AtBatRow({
-    required this.isTop,
     required this.atBat,
     required this.statLineText,
     required this.onDeck,
@@ -1393,7 +1470,6 @@ class _AtBatRow extends StatelessWidget {
     this.showContainer = true,
   });
 
-  final bool isTop;
   final Player atBat;
   final String statLineText;
   final Player onDeck;
@@ -1414,24 +1490,13 @@ class _AtBatRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text.rich(
-                TextSpan(
-                  text: 'AT BAT ',
-                  style: const TextStyle(
-                    color: SbColors.labelMuted,
-                    fontSize: UiCoreTypography.labelMd,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: isTop ? 'AWAY' : 'HOME',
-                      style: const TextStyle(
-                        color: SbColors.teamTagAccent,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                'AT BAT',
                 textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: SbColors.labelMuted,
+                  fontSize: UiCoreTypography.labelMd,
+                ),
               ),
               const SizedBox(height: UiCoreSpacing.xs),
               _StackedBatterName(
@@ -1586,6 +1651,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
     required this.onHitByPitch,
     required this.isDoublePlayEnabled,
     required this.onOutChoice,
+    this.horizontalPadding = SbSpacing.actionRowHPad,
   });
 
   final Future<void> Function(VoidCallback action) onAction;
@@ -1594,17 +1660,18 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
   final VoidCallback onHitByPitch;
   final bool isDoublePlayEnabled;
   final ValueChanged<_OutMenuChoice> onOutChoice;
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SbSpacing.actionRowHPad),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: SbSpacing.actionButtonGap / 2,
               ),
               child: _OutlinedPopupMenuButton<int>(
@@ -1706,7 +1773,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: SbSpacing.actionButtonGap / 2,
               ),
               child: _OutlinedPopupMenuButton<_WalkMenuChoice>(
@@ -1751,7 +1818,7 @@ class _BaseHitWalkedOutMenusRow extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: SbSpacing.actionButtonGap / 2,
               ),
               child: _OutlinedPopupMenuButton<_OutMenuChoice>(
@@ -1840,7 +1907,7 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
 
   @override
   Widget build(BuildContext context) {
-    final fill = SbColors.actionTranslucentFill(widget.rim);
+    final fill = SbColors.canvas.withValues(alpha: kDockedButtonStyle.fillAlpha);
     final iconColor = widget.foreground.withValues(alpha: 0.88);
     final radius = BorderRadius.circular(SbRadii.md);
     final brightness = Theme.of(context).brightness;
@@ -1882,7 +1949,7 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
                   color: fill,
                   border: Border.all(
                     color: widget.rim,
-                    width: UiCoreStroke.hairline,
+                    width: kDockedButtonStyle.borderWidth,
                   ),
                   
                   borderRadius: radius,
@@ -1950,21 +2017,26 @@ class _OutlinedPopupMenuButtonState<T> extends State<_OutlinedPopupMenuButton<T>
 }
 
 class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.actions, required this.onAction});
+  const _ActionRow({
+    required this.actions,
+    required this.onAction,
+    this.horizontalPadding = SbSpacing.actionRowHPad,
+  });
 
   final List<_ActionSpec> actions;
   final Future<void> Function(VoidCallback action) onAction;
+  final double horizontalPadding;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: SbSpacing.actionRowHPad),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Row(
         children: actions
             .map(
               (action) => Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: SbSpacing.actionButtonGap / 2,
                   ),
                   child: _actionButton(action),
@@ -1979,9 +2051,7 @@ class _ActionRow extends StatelessWidget {
   Widget _actionButton(_ActionSpec action) {
     final isEnabled = action.enabled;
     final rim = action.accent ?? SbColors.actionNeutralBorder;
-    final fill = isEnabled
-        ? SbColors.actionTranslucentFill(rim)
-        : SbColors.actionTranslucentFill(SbColors.actionNeutralBorder);
+    final fill = SbColors.canvas.withValues(alpha: kDockedButtonStyle.fillAlpha);
     final fg =
         (action.labelColor ??
                 (action.accent == null ? SbColors.textPrimary : rim))
@@ -1999,7 +2069,7 @@ class _ActionRow extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             color: fill,
-            border: Border.all(color: rim, width: UiCoreStroke.hairline),
+            border: Border.all(color: rim, width: kDockedButtonStyle.borderWidth),
             
             borderRadius: BorderRadius.circular(SbRadii.md),
           ),
@@ -2016,6 +2086,116 @@ class _ActionRow extends StatelessWidget {
                 color: fg,
                 height: UiCoreTypography.lineHeightBody,
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomDockedActionPanel extends StatelessWidget {
+  const _BottomDockedActionPanel({
+    required this.height,
+    required this.hasRunnerOnBase,
+    required this.canSelectDoublePlay,
+    required this.onAction,
+    required this.onBall,
+    required this.onStrike,
+    required this.onFoul,
+    required this.onHit,
+    required this.onWalkBalls,
+    required this.onHitByPitch,
+    required this.onOutChoice,
+    required this.onError,
+    required this.onFieldersChoice,
+  });
+
+  final double height;
+  final bool hasRunnerOnBase;
+  final bool canSelectDoublePlay;
+  final Future<void> Function(VoidCallback action) onAction;
+  final VoidCallback onBall;
+  final VoidCallback onStrike;
+  final VoidCallback onFoul;
+  final void Function(int bases) onHit;
+  final VoidCallback onWalkBalls;
+  final VoidCallback onHitByPitch;
+  final ValueChanged<_OutMenuChoice> onOutChoice;
+  final VoidCallback onError;
+  final VoidCallback onFieldersChoice;
+
+  @override
+  Widget build(BuildContext context) {
+    return _TopBarFrostedFill(
+      blurSigma: kDockedButtonStyle.sigma,
+      fillOpacity: _dockedContainerFillOpacity(context),
+      applyTopEdgeCurve: false,
+      applyBottomEdgeCurve: true,
+      applyLeftEdgeCurve: false,
+      applyRightEdgeCurve: false,
+      edgeCurveVerticalDepth: height,
+      edgeCurveHorizontalDepth: 0,
+      insetVerticalBandsByHorizontalDepth: false,
+      reverseBottomEdgeCurve: false,
+      showDebugEdgeOverlay: false,
+      clipBorderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(SbLayout.chromeEdgeScreenCornerRadius),
+        bottomRight: Radius.circular(SbLayout.chromeEdgeScreenCornerRadius),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+        ),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: SizedBox(
+            height: height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: UiCoreSpacing.sm),
+                _ActionRow(
+                  actions: [
+                    _ActionSpec(label: 'Ball', onTap: onBall),
+                    _ActionSpec(label: 'Strike', onTap: onStrike),
+                    _ActionSpec(label: 'Foul', onTap: onFoul),
+                  ],
+                  horizontalPadding: UiCoreSpacing.xxs,
+                  onAction: onAction,
+                ),
+                const SizedBox(height: SbSpacing.actionButtonGap),
+                _BaseHitWalkedOutMenusRow(
+                  onAction: onAction,
+                  onHit: onHit,
+                  onWalkBalls: onWalkBalls,
+                  onHitByPitch: onHitByPitch,
+                  isDoublePlayEnabled: canSelectDoublePlay,
+                  onOutChoice: onOutChoice,
+                  horizontalPadding: UiCoreSpacing.xxs,
+                ),
+                const SizedBox(height: SbSpacing.actionButtonGap),
+                _ActionRow(
+                  actions: [
+                    _ActionSpec(
+                      label: 'Error (E)',
+                      onTap: onError,
+                      accent: SbColors.errorBorder,
+                      labelColor: SbColors.errorLabel,
+                    ),
+                    _ActionSpec(
+                      label: "Fielder's Choice",
+                      onTap: onFieldersChoice,
+                      accent: SbColors.textPrimary,
+                      labelColor: SbColors.textPrimary,
+                      enabled: hasRunnerOnBase,
+                    ),
+                  ],
+                  horizontalPadding: UiCoreSpacing.xxs,
+                  onAction: onAction,
+                ),
+              ],
             ),
           ),
         ),
@@ -2046,141 +2226,80 @@ class _ActionSpec {
 
 enum _TopBarMenuAction { theme, undo, newGame, stats, roster }
 
-/// Clips left + bottom + right frosted wrap below [topY], constant thickness.
-///
-/// Uses [figma_squircle] [SmoothBorderRadius.toPath]: outer minus inner rectangle
-/// with matching bottom squircle corners ([SbLayout.chromeEdgeSquircleSmoothing]).
-/// Equivalent to an outer [ClipSmoothRect] minus an inset inner clip, without
-/// compositing [BlendMode.dstOut].
-///
-/// [junctionRadius] is only used when corners collapse (thin fallback band).
-class _LRBottomChromeClipper extends CustomClipper<Path> {
-  _LRBottomChromeClipper({
-    required this.topY,
-    required this.sideThickness,
-    required this.bottomThickness,
-    required this.junctionRadius,
-    required this.screenCornerRadius,
-  });
-
-  final double topY;
-  final double sideThickness;
-  final double bottomThickness;
-  final double junctionRadius;
-  final double screenCornerRadius;
-
-  static SmoothBorderRadius _bottomSquircleBorder(double cornerRadius) {
-    final smoothing = cornerRadius > 0
-        ? SbLayout.chromeEdgeSquircleSmoothing
-        : 0.0;
-    final r = SmoothRadius(
-      cornerRadius: cornerRadius,
-      cornerSmoothing: smoothing,
-    );
-    return SmoothBorderRadius.only(bottomLeft: r, bottomRight: r);
-  }
-
-  @override
-  Path getClip(Size size) {
-    final S = sideThickness;
-    final B = bottomThickness;
-    final edgeMin = math.min(S, B);
-    final junctionPx = junctionRadius.clamp(0.0, edgeMin);
-    final w = size.width;
-    final h = size.height;
-    if (topY >= h || S <= 0 || B <= 0 || w <= 0) {
-      return Path();
-    }
-
-    final innerCorner = Radius.circular(junctionPx);
-
-    final outerR = math.min(
-      screenCornerRadius + SbLayout.chromeEdgeCornerOverlap,
-      math.min(w, h) * 0.46,
-    );
-
-    if (outerR <= edgeMin + 1) {
-      final path = Path()..fillType = PathFillType.nonZero;
-      path.addRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(0, topY, S, h - topY),
-          bottomLeft: innerCorner,
-          bottomRight: innerCorner,
-        ),
-      );
-      path.addRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(0, h - B, w, B),
-          topLeft: innerCorner,
-          topRight: innerCorner,
-          bottomLeft: innerCorner,
-          bottomRight: innerCorner,
-        ),
-      );
-      path.addRRect(
-        RRect.fromRectAndCorners(
-          Rect.fromLTWH(w - S, topY, S, h - topY),
-          bottomLeft: innerCorner,
-          bottomRight: innerCorner,
-        ),
-      );
-      return path;
-    }
-
-    final outerRect = Rect.fromLTWH(0, topY, w, h - topY);
-    final innerRect = Rect.fromLTWH(S, topY, w - 2 * S, h - topY - B);
-    if (innerRect.width <= 0 || innerRect.height <= 0) {
-      return Path();
-    }
-
-    final innerR = math.max(0.0, outerR - edgeMin);
-    final outerPath = _bottomSquircleBorder(outerR).toPath(outerRect);
-    final innerPath = _bottomSquircleBorder(innerR).toPath(innerRect);
-
-    return Path.combine(
-      PathOperation.difference,
-      outerPath,
-      innerPath,
-    );
-  }
-
-  @override
-  bool shouldReclip(covariant _LRBottomChromeClipper old) {
-    return old.topY != topY ||
-        old.sideThickness != sideThickness ||
-        old.bottomThickness != bottomThickness ||
-        old.junctionRadius != junctionRadius ||
-        old.screenCornerRadius != screenCornerRadius;
-  }
-}
-
 /// Frosted top chrome: blur behind bar + tinted canvas fill.
 class _TopBarFrostedFill extends StatelessWidget {
   const _TopBarFrostedFill({
     required this.child,
     this.blurSigma,
     this.fillOpacity,
+    this.applyTopEdgeCurve = true,
+    this.applyBottomEdgeCurve = true,
+    this.applyLeftEdgeCurve = true,
+    this.applyRightEdgeCurve = true,
+    this.edgeCurveVerticalDepth,
+    this.edgeCurveHorizontalDepth,
+    this.insetVerticalBandsByHorizontalDepth = true,
+    this.reverseBottomEdgeCurve = false,
+    this.showDebugEdgeOverlay = false,
+    this.clipBorderRadius,
   });
 
   final Widget child;
   final double? blurSigma;
   final double? fillOpacity;
+  final bool applyTopEdgeCurve;
+  final bool applyBottomEdgeCurve;
+  final bool applyLeftEdgeCurve;
+  final bool applyRightEdgeCurve;
+  final double? edgeCurveVerticalDepth;
+  final double? edgeCurveHorizontalDepth;
+  final bool insetVerticalBandsByHorizontalDepth;
+  final bool reverseBottomEdgeCurve;
+  final bool showDebugEdgeOverlay;
+  final BorderRadiusGeometry? clipBorderRadius;
 
   @override
   Widget build(BuildContext context) {
+    final sigma = blurSigma ?? kDockedButtonStyle.sigma;
+    final alpha = fillOpacity ?? kDockedChromeFillOpacity;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final Widget background = _singleBlurFill(
+          sigma: sigma,
+          fillAlpha: alpha,
+          tintColor: Theme.of(context).scaffoldBackgroundColor,
+        );
+
+        final stack = Stack(
+          children: [
+            Positioned.fill(child: background),
+            child,
+          ],
+        );
+        if (clipBorderRadius == null) {
+          return stack;
+        }
+        return ClipRRect(
+          borderRadius: clipBorderRadius!,
+          child: stack,
+        );
+      },
+    );
+  }
+
+  Widget _singleBlurFill({
+    required double sigma,
+    required double fillAlpha,
+    required Color tintColor,
+  }) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(
-          sigmaX: blurSigma ?? kScreenBorderTokens.sigma,
-          sigmaY: blurSigma ?? kScreenBorderTokens.sigma,
+          sigmaX: sigma,
+          sigmaY: sigma,
         ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: SbColors.canvas.withValues(
-              alpha: fillOpacity ?? kScreenBorderTokens.alpha,
-            ),
-          ),
-          child: child,
+        child: ColoredBox(
+          color: tintColor.withValues(alpha: fillAlpha),
         ),
       ),
     );
@@ -2211,20 +2330,28 @@ class _TopTimeAndMenuBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TopBarFrostedFill(
-      blurSigma: kScreenBorderTokens.sigma,
-      fillOpacity: kScreenBorderTokens.alpha,
+      blurSigma: kDockedButtonStyle.sigma,
+      fillOpacity: _dockedContainerFillOpacity(context),
+      applyTopEdgeCurve: false,
+      applyBottomEdgeCurve: true,
+      applyLeftEdgeCurve: false,
+      applyRightEdgeCurve: false,
+      edgeCurveVerticalDepth: topSafeInset + SbLayout.topBarIconSize + SbSpacing.topBarMenuButtonBottomPad,
+      edgeCurveHorizontalDepth: UiCoreSpacing.md * 3,
+      insetVerticalBandsByHorizontalDepth: false,
+      reverseBottomEdgeCurve: true,
+      showDebugEdgeOverlay: false,
+      clipBorderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(SbLayout.chromeEdgeScreenCornerRadius),
+        topRight: Radius.circular(SbLayout.chromeEdgeScreenCornerRadius),
+      ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          SbSpacing.topBarPadLeft,
-          0,
-          SbSpacing.topBarPadRight,
-          0,
-        ),
+        padding: const EdgeInsets.fromLTRB(UiCoreSpacing.sm, 0, UiCoreSpacing.sm, 0),
         child: SizedBox(
           height:
               topSafeInset +
               SbLayout.topBarIconSize +
-              SbSpacing.topBarMenuButtonBottomPad,
+              UiCoreSpacing.sm,
           width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2233,7 +2360,7 @@ class _TopTimeAndMenuBar extends StatelessWidget {
               SizedBox(
                 height:
                     SbLayout.topBarIconSize +
-                    SbSpacing.topBarMenuButtonBottomPad,
+                    UiCoreSpacing.sm,
                 width: double.infinity,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -2242,7 +2369,7 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 0),
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          bottom: SbSpacing.topBarMenuButtonBottomPad,
+                          bottom: UiCoreSpacing.sm,
                         ),
                         child: PopupMenuButton<_TopBarMenuAction>(
                           tooltip: 'Menu',
@@ -2256,7 +2383,7 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                             0,
                             SbLayout.topBarIconSize +
                                 6 +
-                                SbSpacing.topBarMenuButtonBottomPad,
+                                UiCoreSpacing.sm,
                           ),
                           color: SbColors.runnerPanelFill,
                           surfaceTintColor: Colors.transparent,
@@ -2273,13 +2400,21 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                             _TopBarMenuAction.stats => onStats(),
                             _TopBarMenuAction.roster => onRoster(),
                           },
-                          itemBuilder: (context) => [
+                          itemBuilder: (menuContext) {
+                            final themeIconDark =
+                                Theme.of(menuContext).brightness ==
+                                    Brightness.dark;
+                            return [
                             PopupMenuItem<_TopBarMenuAction>(
                               value: _TopBarMenuAction.theme,
                               child: _topMenuRow(
-                                icon: LucideIcons.sun,
+                                icon: themeIconDark
+                                    ? LucideIcons.moon
+                                    : LucideIcons.sun,
                                 label: 'Theme',
-                                iconColor: SbColors.topBarSunIcon,
+                                iconColor: themeIconDark
+                                    ? SbColors.textPrimary
+                                    : SbColors.topBarSunIcon,
                               ),
                             ),
                             PopupMenuItem<_TopBarMenuAction>(
@@ -2313,7 +2448,8 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                                 iconColor: SbColors.pillRosterBg,
                               ),
                             ),
-                          ],
+                            ];
+                          },
                           child: Container(
                             height: SbLayout.topBarIconSize,
                             padding: const EdgeInsets.symmetric(
@@ -2342,13 +2478,9 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                     const Spacer(),
                     Padding(
                       padding: const EdgeInsets.only(
-                        right: SbSpacing.topBarChromeOuterInset,
+                        bottom: UiCoreSpacing.sm,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: SbSpacing.topBarMenuButtonBottomPad,
-                        ),
-                        child: Container(
+                      child: Container(
                           height: SbLayout.topBarIconSize,
                           padding: const EdgeInsets.symmetric(
                             horizontal: SbSpacing.pillPadHCompact,
@@ -2395,7 +2527,6 @@ class _TopTimeAndMenuBar extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ),
                     ),
                   ],
                 ),
@@ -2585,8 +2716,21 @@ class _TopActionBar extends StatelessWidget {
             SbLayout.topBarPillHeight +
             SbSpacing.topBarPadBottom;
         return _TopBarFrostedFill(
-          blurSigma: kScreenBorderTokens.sigma,
-          fillOpacity: kScreenBorderTokens.alpha,
+          blurSigma: kDockedButtonStyle.sigma,
+          fillOpacity: _dockedContainerFillOpacity(context),
+          applyTopEdgeCurve: false,
+          applyBottomEdgeCurve: true,
+          applyLeftEdgeCurve: false,
+          applyRightEdgeCurve: false,
+          edgeCurveVerticalDepth: topSafeInset + chromeBodyHeight,
+          edgeCurveHorizontalDepth: UiCoreSpacing.md * 3,
+          insetVerticalBandsByHorizontalDepth: false,
+          reverseBottomEdgeCurve: true,
+          showDebugEdgeOverlay: false,
+          clipBorderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(SbLayout.chromeEdgeScreenCornerRadius),
+            topRight: Radius.circular(SbLayout.chromeEdgeScreenCornerRadius),
+          ),
           child: Padding(
             padding: const EdgeInsets.only(
               left: SbSpacing.topBarPadLeft,
@@ -2608,7 +2752,22 @@ class _TopActionBar extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        _iconSquare(icon: LucideIcons.sun, onTap: onTheme),
+                        Builder(
+                          builder: (context) {
+                            final themeIconDark =
+                                Theme.of(context).brightness ==
+                                    Brightness.dark;
+                            return _iconSquare(
+                              icon: themeIconDark
+                                  ? LucideIcons.moon
+                                  : LucideIcons.sun,
+                              iconColor: themeIconDark
+                                  ? SbColors.textPrimary
+                                  : SbColors.topBarSunIcon,
+                              onTap: onTheme,
+                            );
+                          },
+                        ),
                         const SizedBox(width: UiCoreSpacing.sm),
                         _pill(
                           text: 'Undo',
@@ -2653,7 +2812,11 @@ class _TopActionBar extends StatelessWidget {
     );
   }
 
-  Widget _iconSquare({required IconData icon, required VoidCallback onTap}) {
+  Widget _iconSquare({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color iconColor = SbColors.topBarSunIcon,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(SbRadii.sm),
@@ -2665,7 +2828,7 @@ class _TopActionBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(SbRadii.sm),
           border: Border.all(color: SbColors.topBarIconSquareBorder),
         ),
-        child: Icon(icon, size: 20, color: SbColors.topBarSunIcon),
+        child: Icon(icon, size: 20, color: iconColor),
       ),
     );
   }
@@ -2720,34 +2883,40 @@ class _PlayByPlayPanel extends StatelessWidget {
     final latest = logs.isEmpty
         ? 'Play ball! Logs will appear here.'
         : logs.last;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        SbSpacing.playByPlayHPad,
-        0,
-        SbSpacing.playByPlayHPad,
-        SbSpacing.playByPlayVPadBottom,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: SbColors.pbpPanelBorder),
+        borderRadius: BorderRadius.circular(SbRadii.sm),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Center(
-            child: Text(
-              'PLAY-BY-PLAY',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: SbColors.labelMuted,
-                letterSpacing: 1.2,
-                fontWeight: FontWeight.w700,
+          Container(
+            color: Colors.black.withValues(
+              alpha: SbLayout.mergedOverlayHeaderAlpha,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: UiCoreSpacing.xxsPlus,
+              vertical: UiCoreSpacing.xs,
+            ),
+            child: const Center(
+              child: Text(
+                'PLAY-BY-PLAY',
+                textAlign: TextAlign.center,
+                style: SbTypography.mergedSectionTitle,
               ),
             ),
           ),
-          const SizedBox(height: SbSpacing.gutterSm),
           Container(
-            padding: const EdgeInsets.all(SbSpacing.playByPlayHPad),
-            decoration: BoxDecoration(
-              color: SbColors.pbpPanelBg,
-              border: Border.all(color: SbColors.pbpPanelBorder),
-              borderRadius: BorderRadius.circular(SbRadii.sm),
+            color: Colors.black.withValues(
+              alpha: SbLayout.mergedOverlayFillAlpha,
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              UiCoreSpacing.xxsPlus,
+              0,
+              UiCoreSpacing.xxsPlus,
+              UiCoreSpacing.xxsPlus,
             ),
             child: Text(
               latest,
